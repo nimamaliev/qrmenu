@@ -53,6 +53,7 @@ const ru: Dictionary = {
     arBadge: "AR в натуральную величину",
     reducedTitle: "От фото до 3D-блюда",
   },
+  menu: { margherita: "Маргарита", diavola: "Диавола", quattro: "Четыре сыра", funghi: "Грибная", lemonade: "Лимонад", water: "Газированная вода", espresso: "Эспрессо", tiramisu: "Тирамису" },
   journey: {
     eyebrow: "Опыт гостя",
     title: "От сканирования до заказа меньше чем за минуту",
@@ -65,6 +66,8 @@ const ru: Dictionary = {
       { title: "Заказать и оплатить", text: "С телефона или через официанта. Вы решаете, как работает ваш ресторан." },
     ],
     screen: {
+      live: "Live",
+      noApp: "Без приложения",
       detected: "QR-код распознан",
       openMenu: "Открыть меню",
       restaurant: "Демо-ресторан",

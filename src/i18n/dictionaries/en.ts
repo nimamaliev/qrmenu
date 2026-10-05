@@ -51,6 +51,7 @@ const en = {
     arBadge: "Life-size AR",
     reducedTitle: "From photo to 3D dish",
   },
+  menu: { margherita: "Margherita", diavola: "Diavola", quattro: "Quattro Formaggi", funghi: "Funghi", lemonade: "Lemonade", water: "Sparkling water", espresso: "Espresso", tiramisu: "Tiramisu" },
   journey: {
     eyebrow: "The guest experience",
     title: "From scan to order in under a minute",
@@ -63,6 +64,8 @@ const en = {
       { title: "Order and pay", text: "From the phone, or with a waiter. You decide how your restaurant works." },
     ],
     screen: {
+      live: "Live",
+      noApp: "No app needed",
       detected: "QR code detected",
       openMenu: "Open menu",
       restaurant: "Demo Restaurant",

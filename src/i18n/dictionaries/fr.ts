@@ -53,6 +53,7 @@ const fr: Dictionary = {
     arBadge: "AR taille réelle",
     reducedTitle: "De la photo au plat en 3D",
   },
+  menu: { margherita: "Margherita", diavola: "Diavola", quattro: "Quatre fromages", funghi: "Champignons", lemonade: "Limonade", water: "Eau gazeuse", espresso: "Expresso", tiramisu: "Tiramisu" },
   journey: {
     eyebrow: "L'expérience client",
     title: "Du scan à la commande en moins d'une minute",
@@ -65,6 +66,8 @@ const fr: Dictionary = {
       { title: "Commander et payer", text: "Depuis le téléphone ou avec un serveur. Vous choisissez comment fonctionne votre restaurant." },
     ],
     screen: {
+      live: "En direct",
+      noApp: "Sans application",
       detected: "QR code détecté",
       openMenu: "Ouvrir la carte",
       restaurant: "Restaurant démo",

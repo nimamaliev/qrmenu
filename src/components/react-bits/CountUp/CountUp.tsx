@@ -14,6 +14,8 @@ interface CountUpProps {
   separator?: string;
   onStart?: () => void;
   onEnd?: () => void;
+  /** Custom formatter, e.g. locale-aware currency. Overrides `separator`. */
+  format?: (value: number) => string;
 }
 
 export default function CountUp({
@@ -26,7 +28,8 @@ export default function CountUp({
   startWhen = true,
   separator = '',
   onStart,
-  onEnd
+  onEnd,
+  format
 }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const motionValue = useMotionValue(direction === 'down' ? to : from);
@@ -56,6 +59,7 @@ export default function CountUp({
 
   const formatValue = useCallback(
     (latest: number) => {
+      if (format) return format(latest);
       const hasDecimals = maxDecimals > 0;
 
       const options: Intl.NumberFormatOptions = {
@@ -68,7 +72,7 @@ export default function CountUp({
 
       return separator ? formattedNumber.replace(/,/g, separator) : formattedNumber;
     },
-    [maxDecimals, separator]
+    [maxDecimals, separator, format]
   );
 
   useEffect(() => {

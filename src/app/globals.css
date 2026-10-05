@@ -74,3 +74,13 @@ details > summary {
 details > summary::-webkit-details-marker {
   display: none;
 }
+
+@keyframes scan {
+  0%,
+  100% {
+    top: 0.75rem;
+  }
+  50% {
+    top: calc(100% - 0.75rem);
+  }
+}

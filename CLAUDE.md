@@ -47,6 +47,16 @@ research), `reverse-engineer-anything` (how an interaction works),
 `ponytail` (keep code lean, but never drop requested features, visual
 quality or accessibility).
 
+## Where things live
+
+- Copy: `src/i18n/dictionaries/{en,de,fr,es,ru}.ts`. English defines the shape;
+  TypeScript fails the build if another language misses a key.
+- Brand name and contact email: `src/lib/site.ts` (both placeholders).
+- Home page sections: `src/components/home/`. The scroll-built pizza is
+  `pizza/PizzaScene.tsx`, a code-made placeholder until the team supplies a
+  real scanned model (or step-by-step photos).
+- Copied React Bits components: `src/components/react-bits/` (keep its LICENSE).
+
 ## Commands
 
 - `npm run dev`: dev server on http://localhost:3000
