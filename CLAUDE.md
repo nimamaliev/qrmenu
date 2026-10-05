@@ -22,13 +22,14 @@ point at the product, while staying responsive on mobile, accessible
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 
-## Project skills (`.claude/skills/`)
+## Tools to reach for
 
-- `react-bits`: add animated/interactive components (text effects,
-  backgrounds, cursor/hover effects) from DavidHDev/react-bits.
-- `screenshot-to-code`: turn a design screenshot into code here, and
-  screenshot our pages (desktop + mobile) to check them visually.
-- `crawl4ai`: crawl reference/competitor sites to Markdown for research.
+Personal skills (installed per user, not in this repo), when available:
+`motionsites` (design briefs), `react-bits` (animated components),
+`screenshot-to-code` (match designs + visual checks), `crawl4ai` (competitor
+research), `reverse-engineer-anything` (how an interaction works),
+`ponytail` (keep code lean, but never drop requested features, visual
+quality or accessibility).
 
 ## Commands
 
