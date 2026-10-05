@@ -7,10 +7,26 @@ service for restaurants. A colleague builds the product itself in a separate
 codebase, so don't build product features (admin panel, analytics backend,
 menu editor) here. This site *presents* them.
 
-Product features the site showcases:
-- QR-code digital menus guests open on their phone
-- 3D models of dishes guests can rotate before ordering
-- An admin panel for restaurants with analytics (scans, popular dishes, peak hours)
+## The product
+
+Where it started: a guest scans a QR code at the table, and their phone camera
+shows a life-size 3D model of the dish sitting on their table. They can judge
+the size and how good it looks before ordering. There's no app to install;
+the phone camera and browser are enough.
+
+What it grew into is a central system for running a restaurant:
+- **Digital menu** opened by scanning a QR code. Restaurants can also keep
+  their printed menus and add a QR code per dish that opens its 3D model.
+- **3D / AR dishes**: a novelty that makes guests curious to try things.
+- **Operations**: which table ordered what, bills, table status, how long
+  guests have been waiting, staff management.
+- **Analytics** across all of the above.
+
+Who it's for: restaurant owners and managers buy it; guests experience the
+"wow". The site sells to owners and uses the guest experience as the hook.
+
+Don't advertise a feature as available unless the user has confirmed it is
+built. Ask when unsure, and label planned features "coming soon".
 
 ## Goal
 
