@@ -57,6 +57,36 @@ quality or accessibility).
   real scanned model (or step-by-step photos).
 - Copied React Bits components: `src/components/react-bits/` (keep its LICENSE).
 
+## Current status (update this when you finish a chunk of work)
+
+Done (v1, desktop-first): one-page home in en/de/fr/es/ru with the
+scroll-built pizza hero, guest journey phone, how it works, owner dashboard
+demo, plans (no prices, "Get a quote"), FAQ (+ FAQPage JSON-LD) and contact.
+Dark warm theme; Playfair Display + Geist (both cover Cyrillic).
+
+Decided / waiting on the user:
+- **Realism**: the user finds the code-made pizza too basic. Waiting for a real
+  scanned pizza `.glb` (ideally layered: base+sauce, cheese, each topping) or a
+  fixed-angle photo per build step, plus a real restaurant photo for the phone
+  "camera" view. The AR phone screen follows the user's reference: live camera
+  view, LIVE badge, corner brackets, "No app needed" tag.
+- **Contact email** stays a placeholder until the user provides one.
+- **Translations**: the user is reviewing de/fr/es/ru.
+- **Mobile polish is deferred** until the design settles; don't spend time on it.
+- Claims to confirm before launch: which phones support the AR view; that
+  restaurants can edit dishes and prices themselves.
+
+Next up: refine the visual style with MotionSites briefs (show the user a
+shortlist before opening any prompt); possibly separate Demo and Pricing pages.
+The user's earlier experiment, https://restaurant-3d-eight.vercel.app/, is
+blocked from cloud sessions; ask for its GitHub repo or screenshots.
+
+Checking visuals: run `npm run dev`, then use Playwright with
+`executablePath: "/opt/pw-browsers/chromium"` and
+`--use-gl=angle --use-angle=swiftshader` so WebGL renders. Scroll with
+`behavior: "instant"`, because the site uses smooth scrolling. Most outside
+websites are blocked by the cloud network policy.
+
 ## Commands
 
 - `npm run dev`: dev server on http://localhost:3000
