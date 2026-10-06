@@ -98,6 +98,12 @@ shortlist (only 2 free opens left).
 The user's earlier experiment, https://restaurant-3d-eight.vercel.app/, is
 blocked from cloud sessions; ask for its GitHub repo or screenshots.
 
+Live preview: https://qrmenu-preview.onrender.com (Render free web service
+`qrmenu-preview`, auto-deploys the branch `claude/nice-ramanujan-rqzau5`; sleeps
+when idle, so the first visit takes up to a minute). The Vercel connector can't
+create projects in the user's team (403 on scope), hence Render. Cloud sessions
+can't open onrender.com; check deploys with the Render tools instead.
+
 Checking visuals: run `npm run dev`, then use Playwright with
 `executablePath: "/opt/pw-browsers/chromium"` and
 `--use-gl=angle --use-angle=swiftshader` so WebGL renders. Scroll with
