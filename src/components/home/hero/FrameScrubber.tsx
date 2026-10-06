@@ -74,6 +74,7 @@ export default function FrameScrubber({ progress, still }: { progress: RefObject
     ro.observe(el);
 
     let shown = progress.current ?? 0;
+    let blended = false;
     let last = performance.now();
     let raf = 0;
     const draw = (img: HTMLImageElement, alpha: number) => {
@@ -90,20 +91,24 @@ export default function FrameScrubber({ progress, still }: { progress: RefObject
       last = now;
       const target = progress.current ?? 0;
       const gap = target - shown;
-      if (Math.abs(gap) > 1e-4) {
+      const moving = Math.abs(gap) > 1e-4;
+      if (moving) {
         shown += gap * (1 - Math.exp(-dt * 7.3));
         dirty = true;
+      } else if (blended) {
+        dirty = true; // settle on a whole frame: a frozen cross-fade would show a double image
       }
       if (!dirty) return;
       const f = shown * (FRAMES - 1);
-      const i = Math.floor(f);
+      const i = moving ? Math.floor(f) : Math.round(f);
       const a = nearest(i);
       if (!a) return;
       dirty = false;
       ctx.clearRect(0, 0, el.width, el.height);
       draw(a, 1);
       const b = imgs[Math.min(i + 1, FRAMES - 1)];
-      if (b && imgs[i] && f - i > 0.01) draw(b, f - i);
+      blended = moving && !!b && !!imgs[i] && f - i > 0.01;
+      if (blended && b) draw(b, f - i);
       ctx.globalAlpha = 1;
       if (poster.current) poster.current.style.visibility = "hidden";
     };
