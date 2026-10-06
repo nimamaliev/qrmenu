@@ -42,3 +42,9 @@ next-env.d.ts
 
 # visual-check screenshots (screenshot-to-code skill)
 /screenshots
+
+# Blender working files (frames are packed into public/hero)
+/blender/render/
+/blender/stills/
+/blender/tex/
+/blender/*.blend*

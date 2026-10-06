@@ -6,7 +6,7 @@ import MobileNav from "./MobileNav";
 import { navLinks } from "./navLinks";
 
 export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
-  const links = navLinks(dict);
+  const links = navLinks(dict, lang);
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-linear-to-b from-bg/95 via-bg/80 via-70% to-transparent pb-4">
       <span aria-hidden="true" className="meter absolute inset-x-0 top-0 h-0.5 bg-text/55" />
@@ -24,12 +24,12 @@ export default function Header({ lang, dict }: { lang: Locale; dict: Dictionary 
         <div className="flex items-center gap-2">
           <LanguageMenu lang={lang} label={dict.nav.language} />
           <a
-            href="#contact"
+            href={`/${lang}#contact`}
             className="pill hidden h-10 px-5 text-[14.5px] sm:inline-flex"
           >
             {dict.nav.bookDemo}
           </a>
-          <MobileNav links={[...links, { href: "#contact", label: dict.nav.bookDemo }]} menuLabel={dict.nav.menu} />
+          <MobileNav links={[...links, { href: `/${lang}#contact`, label: dict.nav.bookDemo }]} menuLabel={dict.nav.menu} />
         </div>
       </div>
     </header>

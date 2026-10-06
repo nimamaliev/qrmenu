@@ -52,9 +52,14 @@ quality or accessibility).
 - Copy: `src/i18n/dictionaries/{en,de,fr,es,ru}.ts`. English defines the shape;
   TypeScript fails the build if another language misses a key.
 - Brand name and contact email: `src/lib/site.ts` (both placeholders).
-- Home page sections: `src/components/home/`. The scroll-built pizza is
-  `pizza/PizzaScene.tsx`, a code-made placeholder until the team supplies a
-  real scanned model (or step-by-step photos).
+- Home page sections: `src/components/home/`. The hero is a pre-rendered
+  burger film scrubbed by scroll (`hero/BurgerStory.tsx`, `hero/FrameScrubber.tsx`,
+  frames in `public/hero/{d,m}/NNN.webp`). "Try it yourself" QR section:
+  `TryIt.tsx`, leading to `/[lang]/demo` (`components/demo/BurgerViewer.tsx`,
+  `<model-viewer>` with `public/models/burger.glb`, self-hosted Draco in `public/draco`).
+- The burger itself: `blender/burger.py` (Blender as a Python module; geometry,
+  numpy textures, lights and animation all in code) and `blender/pack.py`
+  (renders -> web frames). See "Re-rendering the burger" below.
 - Copied React Bits components: `src/components/react-bits/` (keep its LICENSE).
 
 ## Current status (update this when you finish a chunk of work)
@@ -80,20 +85,32 @@ account, don't re-open it). What we took from it:
 - Not taken: the brief's stock studio video and its full-screen preloader
   (would hurt first load).
 
+Done (v3, 2026-10-06): the code-made pizza and the phone mockup are gone (the
+user found the pizza too basic and the phone too close to armenu.co.uk).
+- Hero: a realistic cheeseburger modelled and path-traced in Blender, styled on
+  the user's reference clip (frames were shared in chat, not kept): toasted bun,
+  craggy seared patty, cheese that melts and drips, pickles, shredded onion,
+  sauce, glossy brioche. Story: finished burger -> layers lift away -> each
+  ingredient drops back -> camera orbits -> AR frame. Light paper background
+  (the user chose it over the reference's dark set). Desktop: copy left, burger
+  right; below lg: copy on top, burger under it.
+- Guest section: "Try it yourself" with a real QR code to `/[lang]/demo` (live 3D
+  burger, AR button on supporting phones) plus the five numbered steps.
+- Unverified: AR on real phones (model-viewer: Scene Viewer on Android, a USDZ it
+  generates itself for iOS Quick Look). Ask the user to test on their phones.
+
 Decided / waiting on the user:
-- **Realism**: the user finds the code-made pizza too basic. Waiting for a real
-  scanned pizza `.glb` (ideally layered: base+sauce, cheese, each topping) or a
-  fixed-angle photo per build step, plus a real restaurant photo for the phone
-  "camera" view. The AR phone screen follows the user's reference: live camera
-  view, LIVE badge, corner brackets, "No app needed" tag.
+- **Realism**: the procedural burger is the current best; a real photogrammetry
+  scan (or the team's own filmed build) would beat it. Don't use the reference
+  YouTube clip itself on the site (not ours).
 - **Contact email** stays a placeholder until the user provides one.
 - **Translations**: the user is reviewing de/fr/es/ru.
 - **Mobile polish is deferred** until the design settles; don't spend time on it.
 - Claims to confirm before launch: which phones support the AR view; that
   restaurants can edit dishes and prices themselves.
 
-Next up: the user's feedback on the v2 look; possibly separate Demo and
-Pricing pages. Before opening another MotionSites prompt, show the user a
+Next up: the user's feedback on the burger film and the QR demo (and AR tests
+on their phones); possibly a separate Pricing page. Before opening another MotionSites prompt, show the user a
 shortlist (only 2 free opens left).
 The user's earlier experiment, https://restaurant-3d-eight.vercel.app/, is
 blocked from cloud sessions; ask for its GitHub repo or screenshots.
@@ -103,6 +120,14 @@ Live preview: https://qrmenu-preview.onrender.com (Render free web service
 when idle, so the first visit takes up to a minute). The Vercel connector can't
 create projects in the user's team (403 on scope), hence Render. Cloud sessions
 can't open onrender.com; check deploys with the Render tools instead.
+
+Re-rendering the burger: `uv venv -p 3.13 bl && uv pip install -p bl/bin/python
+bpy pillow numpy`, then `bl/bin/python blender/burger.py --still 0 44 --full` to
+check a look, `--frames` for all 120 frames (about 1 min each on 4 CPU cores,
+resumable, coarse-to-fine order), `bl/bin/python blender/pack.py` to write the
+web frames, and `--export` + the gltf-transform command in `export_models()` for
+the demo model. Timings live in burger.py and are written to
+`src/components/home/hero/burger-timeline.json` for the site.
 
 Checking visuals: run `npm run dev`, then use Playwright with
 `executablePath: "/opt/pw-browsers/chromium"` and
