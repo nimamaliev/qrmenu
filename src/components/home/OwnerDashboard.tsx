@@ -47,9 +47,9 @@ const ORDERS_PER_HOUR = [6, 14, 22, 18, 9, 7, 10, 19, 31, 36, 28, 17, 8];
 
 const STATUS_STYLE: Record<Status, { dot: string; ring: string; text: string }> = {
   free: { dot: "bg-neutral-500", ring: "border-line", text: "text-muted" },
-  ordered: { dot: "bg-sky-400", ring: "border-sky-400/40", text: "text-sky-300" },
-  waiting: { dot: "bg-amber-400", ring: "border-amber-400/50", text: "text-amber-300" },
-  bill: { dot: "bg-violet-400", ring: "border-violet-400/50", text: "text-violet-300" },
+  ordered: { dot: "bg-sky-400", ring: "border-sky-400/40", text: "text-sky-700" },
+  waiting: { dot: "bg-amber-400", ring: "border-amber-400/50", text: "text-amber-700" },
+  bill: { dot: "bg-violet-400", ring: "border-violet-400/50", text: "text-violet-700" },
 };
 
 function StatusIcon({ status }: { status: Status }) {
@@ -119,7 +119,7 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
         {kpis.map((k) => (
           <div key={k.label} className="rounded-2xl bg-surface-2 p-4">
             <p className="text-xs text-muted sm:text-sm">{k.label}</p>
-            <p className="mt-1 text-2xl font-semibold sm:text-3xl">
+            <p className="mt-1 text-2xl font-medium sm:text-3xl">
               <CountUp to={k.value} duration={1.6} format={k.format} />
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
                   className={`flex min-h-24 flex-col justify-between rounded-2xl border bg-bg/40 p-3 text-left transition hover:bg-bg/80 aria-pressed:border-accent aria-pressed:bg-accent/10 ${st.ring}`}
                 >
                   <span className="flex items-center justify-between">
-                    <span className="font-display text-lg font-semibold">{t.id}</span>
+                    <span className="font-display tracking-display text-lg font-medium">{t.id}</span>
                     <span className="text-[11px] text-muted">
                       {t.seats} {owners.floor.seats}
                     </span>
@@ -170,7 +170,7 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
 
         <div className="rounded-2xl bg-surface-2 p-4" aria-live="polite">
           <p className="flex items-center justify-between">
-            <span className="font-display text-xl font-semibold">
+            <span className="font-display tracking-display text-xl font-medium">
               {owners.floor.table} {table.id}
             </span>
             <span className={`flex items-center gap-1.5 text-sm ${STATUS_STYLE[table.status].text}`}>
@@ -183,13 +183,13 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
               <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl bg-bg/40 p-3">
                   <dt className="text-xs text-muted">{owners.panel.waiting}</dt>
-                  <dd className="mt-1 text-lg font-semibold">
+                  <dd className="mt-1 text-lg font-medium">
                     <Elapsed key={table.id} minutes={table.minutes ?? 0} />
                   </dd>
                 </div>
                 <div className="rounded-xl bg-bg/40 p-3">
                   <dt className="text-xs text-muted">{owners.panel.waiter}</dt>
-                  <dd className="mt-1 text-lg font-semibold">{table.waiter}</dd>
+                  <dd className="mt-1 text-lg font-medium">{table.waiter}</dd>
                 </div>
               </dl>
               <p className="mt-4 text-xs text-muted uppercase tracking-wider">{owners.panel.order}</p>
@@ -203,7 +203,7 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 flex justify-between border-t border-line pt-3 font-semibold">
+              <p className="mt-4 flex justify-between border-t border-line pt-3 font-medium">
                 {owners.panel.bill}
                 <span className="tabular-nums">{fmt.money(bill)}</span>
               </p>

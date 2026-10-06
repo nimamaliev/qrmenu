@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --bg: #0e0c0a;
-  --surface: #17140f;
-  --surface-2: #211c16;
-  --line: rgb(255 240 220 / 0.1);
-  --text: #f5efe6;
-  --muted: #b8ad9d;
-  --accent: #ff6a3d;
-  --accent-strong: #ff8559;
-  --saffron: #f2b84b;
+  /* Light editorial palette from the "Cast and Render" MotionSites brief: paper, near-black ink, one warm accent. */
+  color-scheme: light;
+  --bg: #f2f0ec;
+  --surface: #faf9f6;
+  --surface-2: #e8e5df;
+  --line: rgb(13 12 11 / 0.14);
+  --text: #0d0c0b;
+  --muted: #5f5e5c;
+  --accent: #b83219;
+  --accent-strong: #962713;
+  --saffron: #e9a23b;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @theme inline {
@@ -23,8 +25,10 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-saffron: var(--saffron);
-  --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-playfair);
+  --font-sans: var(--font-inter-tight);
+  --font-display: var(--font-inter-tight);
+  --tracking-display: -0.036em;
+  --ease-brief: var(--ease);
 }
 
 html {
@@ -35,7 +39,41 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Fine film grain over the whole page so the flat paper never bands. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.11;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+}
+
+/* Hairline page-progress meter under the header. Zero JS; hidden where scroll timelines are unsupported. */
+.meter {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .meter {
+    display: block;
+    transform-origin: 0 50%;
+    animation: meter linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes meter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* Scroll-driven reveal, zero JS. Browsers without scroll timelines just show the content. */
@@ -65,6 +103,51 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  /* The brief's black pill CTA. Sizes come from utilities at the call site. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgb(10 9 8 / 0.12);
+    background: #0a0908;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    font-weight: 500;
+    letter-spacing: -0.008em;
+    white-space: nowrap;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.1) inset;
+    transition:
+      transform 0.4s var(--ease),
+      background 0.3s var(--ease);
+  }
+  .pill:hover,
+  .pill:focus-visible {
+    transform: translateY(-2px);
+    background: #000;
+  }
+  .pill:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+  }
+  /* Quiet companion to .pill. */
+  .pill-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-weight: 500;
+    letter-spacing: -0.008em;
+    transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .pill-ghost:hover {
+    border-color: rgb(13 12 11 / 0.4);
+    background: rgb(255 255 255 / 0.4);
   }
 }
 

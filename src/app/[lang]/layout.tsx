@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Geist, Playfair_Display } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import { MotionConfig } from "motion/react";
 import { hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -9,12 +9,8 @@ import Header from "@/components/site/Header";
 import Footer from "@/components/site/Footer";
 import "../globals.css";
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin", "latin-ext", "cyrillic"] });
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  style: ["normal", "italic"],
-});
+// The brief's only typeface, two weights. Its Cyrillic subset covers the Russian pages.
+const interTight = Inter_Tight({ variable: "--font-inter-tight", subsets: ["latin", "latin-ext", "cyrillic"], weight: ["400", "500"] });
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -42,7 +38,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const dict = await getDictionary(lang);
 
   return (
-    <html lang={lang} className={`${geist.variable} ${playfair.variable} antialiased`}>
+    <html lang={lang} className={`${interTight.variable} antialiased`}>
       <body className="min-h-svh">
         <MotionConfig reducedMotion="user">
           <Header lang={lang} dict={dict} />

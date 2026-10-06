@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
-import { STAGES, clamp01, range } from "./timeline";
+import { FREE_MARGIN, STAGES, clamp01, freeTop, range } from "./timeline";
 
 /*
  * A Margherita assembled from code: every layer is procedural geometry plus a
@@ -529,7 +529,7 @@ function OvenGlow({ progress }: { progress: Progress }) {
 
 // ---------- camera, layout and the scene ----------
 
-function Rig({ progress, smoothed }: { progress: Progress; smoothed: RefObject<number> }) {
+function Rig({ progress, smoothed, copyBottom }: { progress: Progress; smoothed: RefObject<number>; copyBottom?: RefObject<number> }) {
   const { camera, size, pointer } = useThree();
   const target = useMemo(() => new THREE.Vector3(0, 0.08, 0), []);
   const state = useRef({ radius: 8, polar: 0.98, azimuth: -0.55 });
@@ -543,14 +543,19 @@ function Rig({ progress, smoothed }: { progress: Progress; smoothed: RefObject<n
   }, [camera]);
 
   useFrame((_, dt) => {
-    const k = 1 - Math.exp(-dt * 5);
+    // Ease toward the scroll target instead of snapping (≈ the brief's 0.115 per frame at 60 fps).
+    const k = 1 - Math.exp(-dt * 7.3);
     smoothed.current = (smoothed.current ?? 0) + ((progress.current ?? 0) - (smoothed.current ?? 0)) * k;
     const p = smoothed.current;
     const build = range(p, [0, 0.82]);
     const table = easeOut(range(p, STAGES.table));
-    const narrow = size.width < 640 ? 1.55 : 1;
+    // Fit the board into the space under the centred copy (5.6 ≈ on-screen board height × camera distance).
+    const top = freeTop(size.height, copyBottom?.current);
+    const free = (size.height - top - FREE_MARGIN) / size.height;
+    const minFit = size.width < 640 ? 1.75 : size.width < 1024 ? 1.5 : 1.2;
+    const fit = Math.max(minFit, 5.6 / (8 * free));
     const goal = {
-      radius: (8 - 0.9 * build + 0.6 * table) * narrow,
+      radius: (8 - 0.9 * build + 1.1 * table) * fit,
       polar: 0.98 - 0.08 * build - 0.2 * table + pointer.y * 0.04,
       azimuth: -0.55 + 1.1 * build + 0.4 * table + pointer.x * 0.12,
     };
@@ -560,10 +565,9 @@ function Rig({ progress, smoothed }: { progress: Progress; smoothed: RefObject<n
     s.azimuth += (goal.azimuth - s.azimuth) * k;
     camera.position.setFromSphericalCoords(s.radius, s.polar, s.azimuth).add(target);
     camera.lookAt(target);
-    // Desktop: pizza sits right of the copy. Mobile: starts below the headline, rises as the hero fades.
-    const desktop = size.width >= 1024;
-    const yShift = desktop ? 0 : size.height * (-0.22 + 0.27 * range(p, [0, 0.08]));
-    (camera as THREE.PerspectiveCamera).setViewOffset(size.width, size.height, desktop ? -size.width * 0.2 : 0, yShift, size.width, size.height);
+    // Centred horizontally; the pizza's centre sits in the middle of the free space.
+    const centre = top + (size.height - top - FREE_MARGIN) / 2;
+    (camera as THREE.PerspectiveCamera).setViewOffset(size.width, size.height, 0, size.height / 2 - centre, size.width, size.height);
     if (pizza.current) pizza.current.rotation.y += dt * 0.05;
   });
 
@@ -582,8 +586,11 @@ export default function PizzaScene({
   progress,
   fallback,
   staticFrame = false,
+  copyBottom,
 }: {
   progress: Progress;
+  /** Pixel y where the copy above the pizza ends; the board is framed in the space below it. */
+  copyBottom?: RefObject<number>;
   fallback: React.ReactNode;
   /** Reduced motion: render once, no animation loop. */
   staticFrame?: boolean;
@@ -600,7 +607,7 @@ export default function PizzaScene({
       aria-hidden="true"
     >
       <ambientLight intensity={0.25} />
-      <hemisphereLight args={["#fff3e0", "#2a1a10", 0.55]} />
+      <hemisphereLight args={["#fff3e0", "#8a7a68", 0.6]} />
       <directionalLight position={[-3, 5, 2.5]} intensity={2.4} color="#ffe2b8" />
       <directionalLight position={[3, 2.5, -3]} intensity={1.1} color="#ffb98a" />
       <OvenGlow progress={smoothed} />
@@ -611,8 +618,8 @@ export default function PizzaScene({
       </Environment>
       <Board />
       <Flour progress={smoothed} />
-      <Rig progress={progress} smoothed={smoothed} />
-      <ContactShadows position={[0, -0.121, 0]} opacity={0.6} scale={7} blur={2.6} far={2} />
+      <Rig progress={progress} smoothed={smoothed} copyBottom={copyBottom} />
+      <ContactShadows position={[0, -0.121, 0]} opacity={0.45} scale={7} blur={2.8} far={2} color="#3a2a1c" />
     </Canvas>
   );
 }

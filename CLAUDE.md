@@ -62,7 +62,23 @@ quality or accessibility).
 Done (v1, desktop-first): one-page home in en/de/fr/es/ru with the
 scroll-built pizza hero, guest journey phone, how it works, owner dashboard
 demo, plans (no prices, "Get a quote"), FAQ (+ FAQPage JSON-LD) and contact.
-Dark warm theme; Playfair Display + Geist (both cover Cyrillic).
+
+Done (v2 design, 2026-10-06): restyled after the MotionSites prompt
+**Cast and Render** (the user picked it; opened once, 2 free opens left on the
+account, don't re-open it). What we took from it:
+- Light editorial look: paper `#f2f0ec`, ink `#0d0c0b`, muted `#5f5e5c`, one
+  tomato accent `#b83219` (all AA on paper). Inter Tight 400/500 only (covers
+  Cyrillic); big display type at weight 400 with `tracking-display` (-0.036em).
+- Fine SVG grain over the page (`body::after`), black `.pill` CTAs and
+  `.pill-ghost` (in `globals.css`), header as a paper gradient fade with a
+  2px scroll-progress hairline (CSS scroll timeline, no JS).
+- Hero: fixed stage; scroll eases the 3D build (never snaps) while centred
+  text panels cross-fade with smoothstep ramps, 22px drift and quiet gaps
+  between them (`PANEL_CUES` in `pizza/timeline.ts`). The pizza is framed in
+  the space measured under the hero copy, so long translations and short
+  screens don't overlap. Build stages sit in a centred line at the bottom.
+- Not taken: the brief's stock studio video and its full-screen preloader
+  (would hurt first load).
 
 Decided / waiting on the user:
 - **Realism**: the user finds the code-made pizza too basic. Waiting for a real
@@ -76,8 +92,9 @@ Decided / waiting on the user:
 - Claims to confirm before launch: which phones support the AR view; that
   restaurants can edit dishes and prices themselves.
 
-Next up: refine the visual style with MotionSites briefs (show the user a
-shortlist before opening any prompt); possibly separate Demo and Pricing pages.
+Next up: the user's feedback on the v2 look; possibly separate Demo and
+Pricing pages. Before opening another MotionSites prompt, show the user a
+shortlist (only 2 free opens left).
 The user's earlier experiment, https://restaurant-3d-eight.vercel.app/, is
 blocked from cloud sessions; ask for its GitHub repo or screenshots.
 

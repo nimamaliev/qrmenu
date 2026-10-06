@@ -11,18 +11,27 @@ export const STAGES = {
 
 export const STAGE_ORDER = ["dough", "sauce", "cheese", "tomato", "bake", "basil", "table"] as const;
 
-/** Caption windows, one per story caption in the dictionary. */
-export const CAPTION_WINDOWS: [number, number][] = [
-  [0.09, 0.19],
-  [0.21, 0.33],
-  [0.35, 0.47],
-  [0.5, 0.83],
-  [0.86, 1.01],
+/**
+ * Text panels (hero, then one per story caption) as [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd].
+ * The gaps between panels are deliberate: only the pizza is on screen while a layer lands.
+ */
+export const PANEL_CUES: [number, number, number, number][] = [
+  [0, 0, 0.035, 0.07],
+  [0.09, 0.115, 0.165, 0.19],
+  [0.21, 0.235, 0.305, 0.33],
+  [0.35, 0.375, 0.445, 0.47],
+  [0.5, 0.525, 0.8, 0.83],
+  [0.86, 0.885, 1.1, 1.2],
 ];
 
 export const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 export const range = (p: number, [a, b]: readonly [number, number]) => clamp01((p - a) / (b - a));
 
-/** 0 → 1 → 0 across a window, with `fade` long ramps at both ends. */
-export const windowOpacity = (p: number, [a, b]: readonly [number, number], fade = 0.025) =>
-  clamp01(Math.min((p - a) / fade, (b - p) / fade));
+const smooth = (t: number) => t * t * (3 - 2 * t);
+/** Smoothstep 0 → 1 between a and b (a step when a === b). */
+export const ramp = (p: number, a: number, b: number) => (b <= a ? (p >= b ? 1 : 0) : smooth(clamp01((p - a) / (b - a))));
+
+/** Space kept free under the pizza for the stage line, in px. */
+export const FREE_MARGIN = 48;
+/** Top of the area the pizza is framed in: just under the copy, which may use at most 62% of the screen. */
+export const freeTop = (height: number, copyBottom?: number) => Math.min(copyBottom || height * 0.5, height * 0.62);

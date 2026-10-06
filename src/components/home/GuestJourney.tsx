@@ -106,7 +106,7 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
       </div>
       <div className="absolute inset-x-4 bottom-6 rounded-2xl bg-white p-3 text-[#111] shadow-xl">
         <p className="text-[11px] text-neutral-500">{s.detected}</p>
-        <p className="mt-0.5 flex items-center justify-between text-sm font-semibold">
+        <p className="mt-0.5 flex items-center justify-between text-sm font-medium">
           {s.restaurant}
           <span className="rounded-full bg-[#111] px-3 py-1 text-xs text-white">{s.openMenu}</span>
         </p>
@@ -115,7 +115,7 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
     // 1 · menu
     <div key="menu" className="h-full bg-[#faf7f2] px-4 pt-12 text-[#1c1b19]">
       <p className="text-[11px] text-neutral-500">{s.table}</p>
-      <p className="font-display text-xl font-semibold">{s.restaurant}</p>
+      <p className="font-display tracking-display text-xl font-medium">{s.restaurant}</p>
       <div className="no-scrollbar mt-3 flex gap-1.5 overflow-hidden">
         {s.categories.map((c, i) => (
           <span key={c} className={`shrink-0 rounded-full px-3 py-1 text-[11px] ${i === 0 ? "bg-[#1c1b19] text-white" : "bg-white text-neutral-600"}`}>
@@ -128,17 +128,17 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
           <li key={d.name} className={`flex items-center gap-3 rounded-2xl bg-white p-2.5 shadow-sm ${i === 0 ? "ring-2 ring-accent" : ""}`}>
             <PizzaSvg className="h-12 w-12 shrink-0" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[13px] leading-tight font-semibold">{d.name}</span>
+              <span className="block text-[13px] leading-tight font-medium">{d.name}</span>
               <span className="text-xs text-neutral-500">{price(d.price)}</span>
             </span>
-            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-[#b0431a]">{s.view3d}</span>
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-medium text-[#b0431a]">{s.view3d}</span>
           </li>
         ))}
       </ul>
     </div>,
     // 2 · 3D view
     <div key="3d" className="flex h-full flex-col bg-gradient-to-b from-[#f4efe7] to-[#e6ddd0] px-4 pt-12 text-[#1c1b19]">
-      <span className="self-start rounded-full bg-[#1c1b19] px-2.5 py-1 text-[10px] font-bold text-white">{s.view3d}</span>
+      <span className="self-start rounded-full bg-[#1c1b19] px-2.5 py-1 text-[10px] font-medium text-white">{s.view3d}</span>
       <div className="relative mx-auto mt-4 aspect-square w-[88%]">
         <div className="absolute inset-x-[8%] bottom-[2%] h-[14%] rounded-[50%] bg-black/25 blur-md" />
         <div className="h-full w-full [perspective:600px]">
@@ -153,9 +153,9 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
         </svg>
         {s.dragHint}
       </p>
-      <p className="mt-auto font-display text-lg font-semibold">{menu.margherita}</p>
+      <p className="mt-auto font-display tracking-display text-lg font-medium">{menu.margherita}</p>
       <p className="text-sm text-neutral-500">{price(11.5)} · Ø 30 cm</p>
-      <span className="mt-3 mb-6 rounded-full bg-[#1c1b19] py-2.5 text-center text-sm font-semibold text-white">{s.seeOnTable}</span>
+      <span className="mt-3 mb-6 rounded-full bg-[#1c1b19] py-2.5 text-center text-sm font-medium text-white">{s.seeOnTable}</span>
     </div>,
     // 3 · AR on the table (layout follows the client's reference)
     <div key="ar" className="relative h-full">
@@ -168,7 +168,7 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
           </div>
         </div>
       </div>
-      <span className="absolute top-12 left-4 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white uppercase">
+      <span className="absolute top-12 left-4 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium tracking-wider text-white uppercase">
         <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
         {s.live}
       </span>
@@ -179,7 +179,7 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
     </div>,
     // 4 · order and pay
     <div key="order" className="flex h-full flex-col bg-[#faf7f2] px-4 pt-12 text-[#1c1b19]">
-      <p className="font-display text-xl font-semibold">{s.yourOrder}</p>
+      <p className="font-display tracking-display text-xl font-medium">{s.yourOrder}</p>
       <p className="text-[11px] text-neutral-500">
         {s.restaurant} · {s.table}
       </p>
@@ -197,22 +197,25 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 flex justify-between border-t border-neutral-200 pt-3 font-semibold">
+      <p className="mt-4 flex justify-between border-t border-neutral-200 pt-3 font-medium">
         {s.total}
         <span>{price(33.5)}</span>
       </p>
       <div className="mt-auto mb-6 space-y-2">
-        <span className="block rounded-full bg-accent py-2.5 text-center text-sm font-semibold text-[#1c1b19]">{s.payByPhone}</span>
-        <span className="block rounded-full border border-neutral-300 py-2.5 text-center text-sm font-semibold">{s.callWaiter}</span>
+        <span className="block rounded-full bg-accent py-2.5 text-center text-sm font-medium text-white">{s.payByPhone}</span>
+        <span className="block rounded-full border border-neutral-300 py-2.5 text-center text-sm font-medium">{s.callWaiter}</span>
       </div>
     </div>,
   ];
 
   return (
     <section id="guests" className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:py-32">
-      <div className="reveal max-w-2xl">
-        <p className="text-sm font-medium tracking-[0.2em] text-accent uppercase">{journey.eyebrow}</p>
-        <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">{journey.title}</h2>
+      <div className="reveal max-w-3xl">
+        <p className="flex items-center gap-2 text-[12.5px] tracking-[0.045em] text-muted uppercase">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+          {journey.eyebrow}
+        </p>
+        <h2 className="mt-4 font-display tracking-display text-[clamp(2.25rem,4.6vw,4rem)] leading-[1.02] text-balance">{journey.title}</h2>
         <p className="mt-4 text-lg text-muted">{journey.subtitle}</p>
       </div>
 
@@ -233,7 +236,7 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
                 </div>
               ))}
             </div>
-            <span className="absolute -bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-md bg-[#163a2c] px-3 py-2 font-mono text-[10px] font-semibold tracking-wider whitespace-nowrap text-emerald-100 uppercase shadow-lg sm:text-xs lg:top-[58%] lg:bottom-auto lg:-left-14 lg:translate-x-0">
+            <span className="absolute -bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-md bg-[#163a2c] px-3 py-2 font-mono text-[10px] font-medium tracking-wider whitespace-nowrap text-emerald-100 uppercase shadow-lg sm:text-xs lg:top-[58%] lg:bottom-auto lg:-left-14 lg:translate-x-0">
               {s.noApp}
             </span>
           </div>
@@ -250,11 +253,11 @@ export default function GuestJourney({ lang, journey, menu }: Props) {
               className={`flex min-h-[40svh] items-center transition-opacity duration-500 lg:min-h-[72svh] ${i === active ? "opacity-100" : "opacity-35"}`}
             >
               <div className="flex gap-5">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line font-display text-lg text-accent">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line font-display tracking-display text-lg text-accent">
                   {i + 1}
                 </span>
                 <div>
-                  <h3 className="font-display text-2xl font-semibold sm:text-3xl">{step.title}</h3>
+                  <h3 className="font-display tracking-display text-2xl sm:text-3xl">{step.title}</h3>
                   <p className="mt-2 max-w-md text-lg text-muted">{step.text}</p>
                 </div>
               </div>
