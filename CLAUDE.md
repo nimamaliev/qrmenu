@@ -116,8 +116,10 @@ The user's earlier experiment, https://restaurant-3d-eight.vercel.app/, is
 blocked from cloud sessions; ask for its GitHub repo or screenshots.
 
 Live preview: https://qrmenu-preview.onrender.com (Render free web service
-`qrmenu-preview`, auto-deploys the branch `claude/nice-ramanujan-rqzau5`; sleeps
-when idle, so the first visit takes up to a minute). The Vercel connector can't
+`qrmenu-preview`, id `srv-db2bvgrtqb8s73cs6gqg`, branch `claude/nice-ramanujan-rqzau5`;
+sleeps when idle, so the first visit takes up to a minute). Pushes do NOT deploy
+on their own (no GitHub webhook): after pushing, trigger a deploy with the Render
+tools and check it reaches "live". `NEXT_PUBLIC_SITE_URL` is set there for the QR code. The Vercel connector can't
 create projects in the user's team (403 on scope), hence Render. Cloud sessions
 can't open onrender.com; check deploys with the Render tools instead.
 
