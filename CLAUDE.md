@@ -52,7 +52,7 @@ quality or accessibility).
 - Copy: `src/i18n/dictionaries/{en,de,fr,es,ru}.ts`. English defines the shape;
   TypeScript fails the build if another language misses a key.
 - Brand name and contact email: `src/lib/site.ts` (both placeholders).
-- Home page sections: `src/components/home/`. The hero is a pre-rendered
+- Home page sections: `src/components/home/` ("How it works" figure in `home/how/`). The hero is a pre-rendered
   burger film scrubbed by scroll (`hero/BurgerStory.tsx`, `hero/FrameScrubber.tsx`,
   frames in `public/hero/{d,m}/NNN.webp`). "Try it yourself" QR section:
   `TryIt.tsx`, leading to `/[lang]/demo` (`components/demo/BurgerViewer.tsx`,
@@ -122,12 +122,13 @@ wireframe -> a glowing scan line builds the real burger; last frame = film frame
 in `blender/burger.py` (`--intro-still N`, `--intro [--half]`). Preview first, then
 decide with the user how it plays on the site (once on load is the plan).
 
-Parked (2026-10-17): an Anatomy-style isometric "How it works" figure (camera +
-turntable -> monitor builds the 3D model -> printer issues the QR card -> phone
-shows the dish), approved by the user but to be added to the site later.
-Preview and build script in `prototypes/how-it-works/` (`ANATOMY_DIR=... node
-build.mjs`). To ship it: port to React per the skill's `references/react.md`,
-move the step texts and readouts into the dictionaries (5 languages).
+Done (2026-10-17): "How it works" is an Anatomy-style isometric figure (camera +
+turntable -> monitor builds the 3D model -> printer issues the QR code -> phone
+shows the dish), with the four steps under it. The server builds the SVG once
+(`home/how/art.mjs`, from the approved prototype in `prototypes/how-it-works/`);
+`HowItWorksLive.tsx` tours the stations, follows pointer/keys/step hover, pauses
+offscreen, rests on the last station under reduced motion. Kit (MIT) vendored in
+`src/components/iso/`. Words in `how.figure` in the dictionaries.
 
 Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
 is in `docs/research/igloo-inc.md`. awwwards.com resets connections from cloud

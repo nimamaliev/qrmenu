@@ -132,6 +132,16 @@ const de: Dictionary = {
       { title: "QR-Codes erhalten", text: "Fügen Sie sie Ihrer gedruckten Karte hinzu oder starten Sie eine komplette digitale Speisekarte." },
       { title: "Gäste sehen es auf dem Tisch", text: "Scannen, ansehen, bestellen. Ganz ohne App." },
     ],
+    figure: {
+      fig: "Abb. 1",
+      title: "Vom Foto auf den Tisch",
+      hint: "Station antippen oder ← →",
+      readout: { photos: "Fotos", model: "3D-Modell", printing: "QR-Code wird gedruckt", ready: "QR-Code fertig", table: "auf dem Tisch" },
+      slider: "So funktioniert's: Mit den Pfeiltasten durch die vier Stationen",
+      label:
+        "Ein kleines Studio auf einer Werkbank mit vier Stationen. Eine Kamera fotografiert einen Burger auf einem Drehteller, 24 Fotos, alle 15 Grad eines. Ein Monitor baut daraus das 3D-Modell. Ein Drucker gibt eine Karte mit QR-Code aus. Ein Handy in einer Halterung zeigt den Burger auf dem Tisch.",
+      keys: ["Die Station, die gerade arbeitet", "Das Gericht: ein Burger, von den Fotos bis auf den Tisch des Gastes"],
+    },
   },
   plans: {
     eyebrow: "Pakete",

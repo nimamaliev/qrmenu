@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendored Draco decoder (copied from three.js for <model-viewer>).
     "public/draco/**",
+    "src/components/iso/**", // vendored Anatomy kit (MIT)
   ]),
 ]);
 

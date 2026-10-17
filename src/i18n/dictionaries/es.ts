@@ -132,6 +132,16 @@ const es: Dictionary = {
       { title: "Recibe tus códigos QR", text: "Añádelos a tu carta impresa o lanza una carta digital completa." },
       { title: "El cliente lo ve en su mesa", text: "Escanea, mira y pide. Sin app." },
     ],
+    figure: {
+      fig: "Fig. 1",
+      title: "De la foto a la mesa",
+      hint: "Pasa por una estación o usa ← →",
+      readout: { photos: "fotos", model: "modelo 3D", printing: "imprimiendo código QR", ready: "código QR listo", table: "en la mesa" },
+      slider: "Cómo funciona: las flechas recorren las cuatro estaciones",
+      label:
+        "Un pequeño estudio sobre un banco, en cuatro estaciones. Una cámara fotografía una hamburguesa sobre una base giratoria, 24 fotos, una cada 15 grados. Un monitor construye con ellas el modelo 3D. Una impresora saca una tarjeta con un código QR. Un móvil en un soporte muestra la hamburguesa sobre la mesa.",
+      keys: ["La estación que trabaja ahora", "El plato: una hamburguesa, de las fotos a la mesa del cliente"],
+    },
   },
   plans: {
     eyebrow: "Planes",

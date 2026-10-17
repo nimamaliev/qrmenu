@@ -130,6 +130,16 @@ const en = {
       { title: "Get your QR codes", text: "Add them to your printed menu, or launch a complete digital menu." },
       { title: "Guests see it on the table", text: "They scan, look and order. No app required." },
     ],
+    figure: {
+      fig: "Fig 1",
+      title: "Photo to table",
+      hint: "Hover a station or use ← →",
+      readout: { photos: "photos", model: "3D model", printing: "printing QR code", ready: "QR code ready", table: "on the table" },
+      slider: "How it works: arrow keys step through the four stations",
+      label:
+        "A small studio on a bench, in four stations. A camera photographs a burger on a turntable, 24 photos, one every 15 degrees. A monitor builds the burger's 3D model from them. A printer issues a card with a QR code. A phone on a dock shows the burger standing on the table.",
+      keys: ["The station working now", "The dish: one burger, from photos to the guest's table"],
+    },
   },
   plans: {
     eyebrow: "Plans",

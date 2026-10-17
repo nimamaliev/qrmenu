@@ -1,0 +1,52 @@
+/* "How it works" figure: the Anatomy kit's light theme, warmed to the site's paper, with the tomato accent as the lit part. */
+.hw.iso[data-theme="light"] {
+  --anatomy-page: #f2f0ec;
+  --anatomy-card: #f7f5f1;
+  --anatomy-paper: #f7f5f1;
+  --anatomy-face: #fdfcfa;
+  --anatomy-top: #fdfcfa;
+  --anatomy-shade-0: #dedad3;
+  --anatomy-shade-1: #e6e3dd;
+  --anatomy-shade-2: #eeebe6;
+  --anatomy-shade-3: #f4f2ee;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #f1ece7;
+  --anatomy-hi: #0d0c0b;
+  --anatomy-mid: #86837e;
+  --anatomy-lo: #b6b2ab;
+  --anatomy-faint: #d6d2cb;
+  --anatomy-lit: #b83219;
+  --anatomy-dot: #3a3835;
+  --anatomy-text: #5f5e5c;
+  --anatomy-strong: #0d0c0b;
+  --anatomy-muted: #6f6d69;
+  --hw-screen: #ebe8e2;
+  --hw-bun: #f8f6f2;
+  --hw-cheese: #fdfcfa;
+  --hw-tomato: #d8d3cb;
+  --hw-patty: #a29d95;
+  --hw-table: #e0dcd4;
+  background: transparent;
+  color: inherit;
+}
+.hw .iso-figure { margin: 0 auto; }
+.hw .iso-plate { border-radius: 1.5rem; }
+.hw .iso-stage { outline-offset: 4px; border-radius: 0.75rem; cursor: default; }
+.hw .iso-stage:focus-visible { outline: 2px solid var(--anatomy-hi); }
+.hw-screen { fill: var(--hw-screen); }
+.hw-screen-edge { fill: none; stroke: var(--anatomy-lo); stroke-width: var(--anatomy-weight); vector-effect: non-scaling-stroke; }
+.hw-bun { fill: var(--hw-bun); }
+.hw-cheese { fill: var(--hw-cheese); }
+.hw-tomato { fill: var(--hw-tomato); }
+.hw-patty { fill: var(--hw-patty); }
+.hw-table { fill: var(--hw-table); }
+.hw-shadow { fill: var(--anatomy-hi); fill-opacity: 0.16; }
+.hw-bar { fill: var(--anatomy-faint); }
+.hw-bar-fill { fill: var(--anatomy-lit); }
+.hw-qr, .hw-island { fill: var(--anatomy-hi); }
+.hw-led { fill: var(--anatomy-lo); }
+.hw-led[data-on] { fill: var(--anatomy-lit); }
+.hw-flow { opacity: 0; transition: opacity 0.4s; }
+[data-cable][data-on] .hw-flow { opacity: 1; }
+[data-cable][data-on] .iso-wire > .iso-line { stroke: var(--anatomy-mid); }
+.iso-line[data-tick][data-tone="hi"] { stroke: var(--anatomy-lit); }

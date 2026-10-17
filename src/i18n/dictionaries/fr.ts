@@ -132,6 +132,16 @@ const fr: Dictionary = {
       { title: "Recevez vos QR codes", text: "Ajoutez-les à votre carte imprimée ou lancez une carte entièrement digitale." },
       { title: "Le client le voit sur sa table", text: "Il scanne, regarde et commande. Sans application." },
     ],
+    figure: {
+      fig: "Fig. 1",
+      title: "De la photo à la table",
+      hint: "Survolez une étape ou ← →",
+      readout: { photos: "photos", model: "modèle 3D", printing: "impression du QR code", ready: "QR code prêt", table: "sur la table" },
+      slider: "Comment ça marche : les flèches parcourent les quatre étapes",
+      label:
+        "Un petit studio sur un établi, en quatre étapes. Un appareil photo photographie un burger sur un plateau tournant, 24 photos, une tous les 15 degrés. Un écran en construit le modèle 3D. Une imprimante sort une carte avec un QR code. Un téléphone sur un support montre le burger posé sur la table.",
+      keys: ["L'étape en cours", "Le plat : un burger, des photos jusqu'à la table du client"],
+    },
   },
   plans: {
     eyebrow: "Offres",
