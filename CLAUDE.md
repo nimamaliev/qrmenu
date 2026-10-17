@@ -130,8 +130,16 @@ shows the dish), with the four steps under it. The server builds the SVG once
 offscreen, rests on the last station under reduced motion. Kit (MIT) vendored in
 `src/components/iso/`. Words in `how.figure` in the dictionaries.
 
+In progress (2026-10-17): a 3D QR (after a reel of louisraille.fr the user
+shared): dark modules are blocks of varied height, the burger stands on a plate
+in the middle; as the camera rises to straight above (scroll, or tap) the blocks
+settle and it scans (error correction H, checked with jsQR on screenshots).
+`components/qr3d/QrScene.tsx`, unlinked noindex test page `/[lang]/lab/qr`.
+If approved it replaces the flat QR in "Try it yourself" (then delete the lab).
+
 Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
-is in `docs/research/igloo-inc.md`. awwwards.com resets connections from cloud
+is in `docs/research/igloo-inc.md`; Ciao Energy and FIX Chocolatier in
+`docs/research/ciao-energy-fix-chocolatier.md`. awwwards.com resets connections from cloud
 sessions (even with domain access).
 
 Next up: the user's feedback on the burger film and the QR demo (and AR tests
