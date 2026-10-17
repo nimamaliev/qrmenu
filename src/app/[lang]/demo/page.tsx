@@ -31,7 +31,7 @@ export default async function Demo({ params }: PageProps<"/[lang]/demo">) {
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />
           {demo.eyebrow}
         </p>
-        <h1 className="mt-4 font-display text-[clamp(2.1rem,4.4vw,3.75rem)] leading-[1.02] tracking-display text-balance">{demo.title}</h1>
+        <h1 className="headline mt-4 text-[clamp(2.6rem,5.4vw,4.75rem)] text-balance">{demo.title}</h1>
         <p className="mt-4 text-pretty text-muted lg:text-lg">{demo.text}</p>
         <p className="mt-6 hidden text-sm text-muted lg:block">{demo.note}</p>
         <a href={`/${lang}`} className="pill-ghost mt-6 hidden h-11 px-5 text-sm lg:inline-flex">

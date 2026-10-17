@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { SITE_URL } from "@/lib/site";
+import FocusHeadline from "@/components/site/FocusHeadline";
 
 /**
  * The guest journey, explained by letting the visitor live it: a real QR code that opens the
@@ -19,12 +20,12 @@ export default async function TryIt({ lang, journey }: { lang: Locale; journey: 
 
   return (
     <section id="guests" className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:py-32">
-      <div className="reveal max-w-3xl">
+      <div className="max-w-4xl">
         <p className="flex items-center gap-2 text-[12.5px] tracking-[0.045em] text-muted uppercase">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
           {journey.eyebrow}
         </p>
-        <h2 className="mt-4 font-display text-[clamp(2.25rem,4.6vw,4rem)] leading-[1.02] tracking-display text-balance">{journey.title}</h2>
+        <FocusHeadline text={journey.title} className="mt-4 text-[clamp(2.75rem,6.2vw,5.5rem)] text-balance" />
         <p className="mt-4 text-lg text-muted">{journey.subtitle}</p>
       </div>
 
@@ -32,7 +33,7 @@ export default async function TryIt({ lang, journey }: { lang: Locale; journey: 
         <ol className="divide-y divide-line border-y border-line">
           {journey.steps.map((step, i) => (
             <li key={step.title} className="reveal grid grid-cols-[3.5rem_1fr] items-baseline gap-x-4 py-6 sm:grid-cols-[5rem_1fr]">
-              <span className="font-display text-4xl tracking-display text-text/25 sm:text-5xl">{String(i + 1).padStart(2, "0")}</span>
+              <span className="headline text-5xl text-text/25 sm:text-6xl">{String(i + 1).padStart(2, "0")}</span>
               <div>
                 <h3 className="text-xl font-medium tracking-[-0.01em] sm:text-2xl">{step.title}</h3>
                 <p className="mt-1.5 max-w-md text-muted">{step.text}</p>

@@ -72,8 +72,8 @@ Done (v2 design, 2026-10-06): restyled after the MotionSites prompt
 **Cast and Render** (the user picked it; opened once, 2 free opens left on the
 account, don't re-open it). What we took from it:
 - Light editorial look: paper `#f2f0ec`, ink `#0d0c0b`, muted `#5f5e5c`, one
-  tomato accent `#b83219` (all AA on paper). Inter Tight 400/500 only (covers
-  Cyrillic); big display type at weight 400 with `tracking-display` (-0.036em).
+  tomato accent `#b83219` (all AA on paper). Inter Tight 400/500 (covers
+  Cyrillic) for text; headlines changed to Anton later (see below).
 - Fine SVG grain over the page (`body::after`), black `.pill` CTAs and
   `.pill-ghost` (in `globals.css`), header as a paper gradient fade with a
   2px scroll-progress hairline (CSS scroll timeline, no JS).
@@ -108,6 +108,19 @@ Decided / waiting on the user:
 - **Mobile polish is deferred** until the design settles; don't spend time on it.
 - Claims to confirm before launch: which phones support the AR view; that
   restaurants can edit dishes and prices themselves.
+
+Done (2026-10-17): headlines switched to tall condensed capitals after the
+user's Le Pain Quotidien reference (it uses Druk, a paid font). The user chose
+Anton (free) with Oswald 700 catching Russian letters (Anton has no Cyrillic);
+`.headline` in `globals.css`, fonts in `[lang]/layout.tsx`. Inter Tight stays for
+body text and small titles. Section headings use `FocusHeadline`: words go from
+blurred to grey to ink as the heading scrolls up (CSS scroll timeline, still under
+reduced motion; browsers without scroll timelines show plain text).
+
+In progress (2026-10-17): a "scan to 3D" intro for the burger film (dots -> tomato
+wireframe -> a glowing scan line builds the real burger; last frame = film frame 0),
+in `blender/burger.py` (`--intro-still N`, `--intro [--half]`). Preview first, then
+decide with the user how it plays on the site (once on load is the plan).
 
 Parked (2026-10-17): an Anatomy-style isometric "How it works" figure (camera +
 turntable -> monitor builds the 3D model -> printer issues the QR card -> phone

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Inter_Tight } from "next/font/google";
+import { Anton, Inter_Tight, Oswald } from "next/font/google";
 import { MotionConfig } from "motion/react";
 import { hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -11,6 +11,10 @@ import "../globals.css";
 
 // The brief's only typeface, two weights. Its Cyrillic subset covers the Russian pages.
 const interTight = Inter_Tight({ variable: "--font-inter-tight", subsets: ["latin", "latin-ext", "cyrillic"], weight: ["400", "500"] });
+// Headlines: tall condensed capitals in the spirit of Druk (the user's Le Pain Quotidien reference).
+// Anton has no Cyrillic, so Russian letters fall through to Oswald; its file only loads when used.
+const anton = Anton({ variable: "--font-anton", subsets: ["latin", "latin-ext"], weight: "400" });
+const oswald = Oswald({ variable: "--font-oswald", subsets: ["cyrillic"], weight: "700", preload: false });
 
 export function generateStaticParams() {
   return locales.map((lang) => ({ lang }));
@@ -38,7 +42,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   const dict = await getDictionary(lang);
 
   return (
-    <html lang={lang} className={`${interTight.variable} antialiased`}>
+    <html lang={lang} className={`${interTight.variable} ${anton.variable} ${oswald.variable} antialiased`}>
       <body className="min-h-svh">
         <MotionConfig reducedMotion="user">
           <Header lang={lang} dict={dict} />

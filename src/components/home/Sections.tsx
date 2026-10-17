@@ -3,16 +3,17 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { CONTACT_EMAIL } from "@/lib/site";
 import Magnet from "@/components/react-bits/Magnet/Magnet";
 import SpotlightCard from "@/components/react-bits/SpotlightCard/SpotlightCard";
+import FocusHeadline from "@/components/site/FocusHeadline";
 import OwnerDashboard from "./OwnerDashboard";
 
 function Heading({ eyebrow, title, subtitle, center = false }: { eyebrow: string; title: string; subtitle?: string; center?: boolean }) {
   return (
-    <div className={`reveal max-w-3xl ${center ? "mx-auto flex flex-col items-center text-center" : ""}`}>
+    <div className={`max-w-4xl ${center ? "mx-auto flex flex-col items-center text-center" : ""}`}>
       <p className="flex items-center gap-2 text-[12.5px] tracking-[0.045em] text-muted uppercase">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
         {eyebrow}
       </p>
-      <h2 className="mt-4 font-display tracking-display text-[clamp(2.25rem,4.6vw,4rem)] leading-[1.02] text-balance">{title}</h2>
+      <FocusHeadline text={title} className="mt-4 text-[clamp(2.75rem,6.2vw,5.5rem)] text-balance" />
       {subtitle && <p className="mt-4 text-lg text-muted">{subtitle}</p>}
     </div>
   );
@@ -48,7 +49,7 @@ export function HowItWorks({ how }: { how: Dictionary["how"] }) {
         <ol className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {how.steps.map((step, i) => (
             <li key={step.title} className="reveal relative rounded-3xl border border-line bg-bg p-6">
-              <span className="absolute top-6 right-6 font-display tracking-display text-5xl text-line">{i + 1}</span>
+              <span className="headline absolute top-6 right-6 text-6xl text-line">{i + 1}</span>
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent/12 text-accent [&>svg]:h-6 [&>svg]:w-6">
                 {STEP_ICONS[i]}
               </span>
@@ -165,7 +166,7 @@ export function Contact({ cta }: { cta: Dictionary["cta"] }) {
   return (
     <section id="contact" className="px-4 pb-24 sm:px-6 lg:pb-32">
       <div className="reveal relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-text bg-[radial-gradient(circle_at_50%_120%,rgb(184_50_25/0.45),transparent_60%)] px-6 py-20 text-center text-bg sm:px-12 sm:py-28">
-        <h2 className="mx-auto max-w-3xl font-display tracking-display text-[clamp(2.25rem,4.6vw,4rem)] leading-[1.02] text-balance">{cta.title}</h2>
+        <FocusHeadline text={cta.title} className="mx-auto max-w-4xl text-[clamp(2.75rem,6.2vw,5.5rem)] text-balance [--muted:rgb(242_240_236/0.6)] [--text:var(--bg)]" />
         <p className="mx-auto mt-5 max-w-xl text-lg text-bg/70">{cta.text}</p>
         <div className="mt-10 flex flex-col items-center gap-4">
           <Magnet padding={80} magnetStrength={3}>

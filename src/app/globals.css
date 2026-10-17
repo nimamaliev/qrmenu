@@ -27,6 +27,7 @@
   --color-saffron: var(--saffron);
   --font-sans: var(--font-inter-tight);
   --font-display: var(--font-inter-tight);
+  --font-headline: var(--font-anton), var(--font-oswald), "Arial Narrow", sans-serif;
   --tracking-display: -0.036em;
   --ease-brief: var(--ease);
 }
@@ -93,6 +94,37 @@ body::after {
   }
 }
 
+/* Headline words come into focus as the heading scrolls up: blurred and faint, then grey, then ink.
+   Each word (--i of --n) starts a little later. Real text throughout; still for reduced motion. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .focus-in {
+      view-timeline-name: --focus-in;
+    }
+    .focus-in > .w {
+      animation: focus-in linear both;
+      animation-timeline: --focus-in;
+      animation-range: cover calc(6% + var(--i) / var(--n) * 26%) cover calc(20% + var(--i) / var(--n) * 26%);
+    }
+  }
+}
+@keyframes focus-in {
+  0% {
+    opacity: 0.25;
+    filter: blur(7px);
+    color: var(--muted);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+    color: color-mix(in srgb, var(--text) 50%, transparent);
+  }
+  100% {
+    filter: blur(0);
+    color: var(--text);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -107,6 +139,14 @@ body::after {
 }
 
 @layer components {
+  /* Display headlines: condensed capitals, set tight. */
+  .headline {
+    font-family: var(--font-headline);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.94;
+    letter-spacing: 0.004em;
+  }
   /* The brief's black pill CTA. Sizes come from utilities at the call site. */
   .pill {
     display: inline-flex;

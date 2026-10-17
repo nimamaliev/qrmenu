@@ -20,7 +20,7 @@ const useReducedMotion = () => useSyncExternalStore(subscribe, () => window.matc
 const DRIFT = 22;
 
 const eyebrowCls = "text-[12.5px] tracking-[0.045em] text-muted uppercase";
-const titleCls = "font-display tracking-display text-balance";
+const titleCls = "headline text-balance";
 const subCls = "text-pretty text-muted";
 /** Desktop: copy in the left column, the burger fills the right. Below lg: copy on top, burger under it. */
 const panelCls =
@@ -112,7 +112,7 @@ export default function BurgerStory({ hero, story }: { hero: Dictionary["hero"];
         <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
         {hero.eyebrow}
       </p>
-      <h1 className={`${titleCls} mt-5 max-w-[15ch] text-[clamp(2.4rem,5.4vw,4.75rem)] leading-[0.98]`}>
+      <h1 className={`${titleCls} mt-5 max-w-[14ch] text-[clamp(3rem,6.8vw,6rem)]`}>
         <BlurText text={hero.title} animateBy="words" direction="bottom" delay={90} className="justify-center lg:justify-start" />
       </h1>
       <p className={`${subCls} mt-6 max-w-[42ch] text-[clamp(1rem,1.28vw,1.19rem)] leading-normal`}>{hero.subtitle}</p>
@@ -164,11 +164,11 @@ export default function BurgerStory({ hero, story }: { hero: Dictionary["hero"];
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <h2 className={`${titleCls} text-4xl`}>{story.reducedTitle}</h2>
+          <h2 className={`${titleCls} text-5xl`}>{story.reducedTitle}</h2>
           <ol className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {story.captions.map((c, i) => (
               <li key={i} className="rounded-2xl border border-line bg-surface p-6">
-                <p className={`${titleCls} text-2xl`}>{c.title}</p>
+                <p className={`${titleCls} text-3xl`}>{c.title}</p>
                 <p className="mt-2 text-muted">{c.text}</p>
               </li>
             ))}
@@ -210,7 +210,7 @@ export default function BurgerStory({ hero, story }: { hero: Dictionary["hero"];
                 <p className={eyebrowCls}>
                   {String(i).padStart(2, "0")} / {String(story.captions.length).padStart(2, "0")}
                 </p>
-                <p className={`${titleCls} mt-5 max-w-[16ch] text-[clamp(2.1rem,4.4vw,4.25rem)] leading-[1.02]`}>{c.title}</p>
+                <p className={`${titleCls} mt-5 max-w-[15ch] text-[clamp(2.6rem,5.6vw,5.25rem)]`}>{c.title}</p>
                 <p className={`${subCls} mt-5 max-w-[40ch] text-[clamp(1rem,1.28vw,1.19rem)] leading-normal`}>{c.text}</p>
               </>
             )}
