@@ -22,6 +22,7 @@ import bpy  # must come first: it makes bmesh and mathutils importable
 import bmesh  # noqa: E402
 import numpy as np
 from mathutils import Vector, noise
+from mathutils.bvhtree import BVHTree
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -678,12 +679,240 @@ def write_timeline():
         fh.write("\n")
 
 
-def setup():
+# ---------------------------------------------------------------------------
+# Scan intro: photos -> points -> wireframe mesh -> a glowing scan line turns it solid.
+# Played once on load before the scroll story; its last frame is the film's frame 0.
+# Rendered on its own frame range so the scroll film's keyframes stay untouched.
+# ---------------------------------------------------------------------------
+INTRO_FRAMES = 48
+INTRO_AT = 1000  # scene frame of intro frame 0
+RAW_INTRO = os.path.join(ROOT, "blender", "render_intro")
+SCAN_LOW, SCAN_HIGH = -0.004, 0.106  # scan line travel: just under the bun -> just over the crown
+WIRE_COL = "#b83219"  # the site's tomato accent
+GLOW_COL = (1.0, 0.42, 0.12)
+
+
+def intro_curves(t):
+    dots = smooth(ramp(t, 0.0, 0.3))
+    wire = smooth(ramp(t, 0.14, 0.4))
+    h = SCAN_LOW + (SCAN_HIGH - SCAN_LOW) * smooth(ramp(t, 0.42, 0.94))
+    ease = 1 - (1 - t) ** 3  # camera glides in and lands softly on the film's first frame
+    return dots, wire, h, ease
+
+
+def scan_group():
+    """Shared node group: the scan values (keyframed) and masks from world height."""
+    ng = bpy.data.node_groups.new("Scan", "ShaderNodeTree")
+    for name in ("above", "band", "wire", "dots"):
+        ng.interface.new_socket(name, in_out="OUTPUT", socket_type="NodeSocketFloat")
+    N, L = ng.nodes, ng.links
+    out = N.new("NodeGroupOutput")
+    val = {}
+    for name, v in (("H", SCAN_HIGH), ("WIRE", 0.0), ("DOTS", 0.0)):
+        n = N.new("ShaderNodeValue")
+        n.name = n.label = name
+        n.outputs[0].default_value = v
+        val[name] = n.outputs[0]
+    geo = N.new("ShaderNodeNewGeometry")
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(geo.outputs["Position"], sep.inputs[0])
+    z = sep.outputs["Z"]
+
+    def add(a, b):
+        n = N.new("ShaderNodeMath")
+        n.operation = "ADD"
+        L.new(a, n.inputs[0])
+        n.inputs[1].default_value = b
+        return n.outputs[0]
+
+    def mul(a, b):
+        n = N.new("ShaderNodeMath")
+        n.operation = "MULTIPLY"
+        L.new(a, n.inputs[0])
+        L.new(b, n.inputs[1])
+        return n.outputs[0]
+
+    def window(lo, hi, flip=False):
+        n = N.new("ShaderNodeMapRange")
+        n.interpolation_type = "SMOOTHSTEP"
+        L.new(z, n.inputs["Value"])
+        L.new(lo, n.inputs["From Min"])
+        L.new(hi, n.inputs["From Max"])
+        n.inputs["To Min"].default_value, n.inputs["To Max"].default_value = (1, 0) if flip else (0, 1)
+        return n.outputs[0]
+
+    h = val["H"]
+    above = window(add(h, -0.0004), add(h, 0.0004))  # 1 where the burger isn't built yet
+    band = mul(window(add(h, -0.003), h), window(add(h, -0.0004), add(h, 0.0004), flip=True))
+    ahead = window(h, add(h, 0.005))  # wire and dots live just ahead of the line and beyond
+    L.new(above, out.inputs["above"])
+    L.new(band, out.inputs["band"])
+    L.new(mul(ahead, val["WIRE"]), out.inputs["wire"])
+    L.new(mul(ahead, val["DOTS"]), out.inputs["dots"])
+    return ng
+
+
+def scan_setup():
+    sc = bpy.context.scene
+    ng = scan_group()
+
+    # Food materials: hidden above the line, a hot glow just under it.
+    for m in [m for m in bpy.data.materials if m.use_nodes and "Principled BSDF" in m.node_tree.nodes]:
+        N, L = m.node_tree.nodes, m.node_tree.links
+        p, outn = N["Principled BSDF"], N["Material Output"]
+        g = N.new("ShaderNodeGroup")
+        g.node_tree = ng
+        em = N.new("ShaderNodeEmission")
+        em.inputs["Color"].default_value = (*GLOW_COL, 1)
+        mul = N.new("ShaderNodeMath")
+        mul.operation = "MULTIPLY"
+        mul.inputs[1].default_value = 7.0
+        L.new(g.outputs["band"], mul.inputs[0])
+        L.new(mul.outputs[0], em.inputs["Strength"])
+        addn = N.new("ShaderNodeAddShader")
+        L.new(p.outputs[0], addn.inputs[0])
+        L.new(em.outputs[0], addn.inputs[1])
+        # inside surfaces show only through the cut: paint them as a glowing cross-section cap
+        cap = N.new("ShaderNodeEmission")
+        cap.inputs["Color"].default_value = (*GLOW_COL, 1)
+        cap.inputs["Strength"].default_value = 1.6
+        geo = N.new("ShaderNodeNewGeometry")
+        capmix = N.new("ShaderNodeMixShader")
+        L.new(geo.outputs["Backfacing"], capmix.inputs["Fac"])
+        L.new(addn.outputs[0], capmix.inputs[1])
+        L.new(cap.outputs[0], capmix.inputs[2])
+        mix = N.new("ShaderNodeMixShader")
+        tr = N.new("ShaderNodeBsdfTransparent")
+        L.new(g.outputs["above"], mix.inputs["Fac"])
+        L.new(capmix.outputs[0], mix.inputs[1])
+        L.new(tr.outputs[0], mix.inputs[2])
+        L.new(mix.outputs[0], outn.inputs["Surface"])
+
+    def glow_mat(name, key, strength, rnd=False):
+        m = bpy.data.materials.new(name)
+        m.use_nodes = True
+        N, L = m.node_tree.nodes, m.node_tree.links
+        N.remove(N["Principled BSDF"])
+        g = N.new("ShaderNodeGroup")
+        g.node_tree = ng
+        em = N.new("ShaderNodeEmission")
+        em.inputs["Color"].default_value = (*[c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in hexc(WIRE_COL)], 1)
+        em.inputs["Strength"].default_value = strength
+        vis = g.outputs[key]
+        if rnd:  # each dot pops in at its own moment: visible once DOTS passes its random value
+            at = N.new("ShaderNodeAttribute")
+            at.attribute_name = "rnd"
+            gt = N.new("ShaderNodeMath")
+            gt.operation = "GREATER_THAN"
+            L.new(vis, gt.inputs[0])
+            L.new(at.outputs["Fac"], gt.inputs[1])
+            vis = gt.outputs[0]
+        inv = N.new("ShaderNodeMath")
+        inv.operation = "SUBTRACT"
+        inv.inputs[0].default_value = 1.0
+        L.new(vis, inv.inputs[1])
+        mix = N.new("ShaderNodeMixShader")
+        tr = N.new("ShaderNodeBsdfTransparent")
+        L.new(inv.outputs[0], mix.inputs["Fac"])
+        L.new(em.outputs[0], mix.inputs[1])
+        L.new(tr.outputs[0], mix.inputs[2])
+        L.new(mix.outputs[0], N["Material Output"].inputs["Surface"])
+        return m
+
+    # The scan result, as photogrammetry gives it: only the outer skin. A geodesic sphere is
+    # shrunk onto the assembled burger by casting rays at its centre, so the mesh is regular.
+    sc.frame_set(0)
+    dg = bpy.context.evaluated_depsgraph_get()
+    bm = bmesh.new()
+    for ob in [o for o in sc.objects if o.type in {"MESH", "CURVE"} and o.name != "Floor"]:
+        me = ob.evaluated_get(dg).to_mesh()
+        me.transform(ob.matrix_world)
+        bm.from_mesh(me)
+        ob.evaluated_get(dg).to_mesh_clear()
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    centre = Vector((0, 0, 0.05))
+
+    def hull(name, subdivisions, lift):
+        bm = bmesh.new()
+        bmesh.ops.create_icosphere(bm, subdivisions=subdivisions, radius=1)
+        for v in bm.verts:
+            d = v.co.normalized()
+            hit = tree.ray_cast(centre + d * 0.3, -d)[0]
+            v.co = (hit if hit else centre + d * 0.06) + d * lift  # a hair outside, so lines sit on top
+        for _ in range(2):  # relax spikes where rays slip into the gaps between layers
+            bmesh.ops.smooth_vert(bm, verts=bm.verts, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        me = bpy.data.meshes.new(name)
+        bm.to_mesh(me)
+        bm.free()
+        ob = bpy.data.objects.new(name, me)
+        sc.collection.objects.link(ob)
+        return ob
+
+    scan = hull("ScanWire", 3, 0.0007)
+    points = hull("ScanPointsSrc", 4, 0.0007)
+
+    # Dots at the denser hull's vertices (the point cloud), each with a random pop-in value.
+    rng = np.random.default_rng(7)
+    bm = bmesh.new()
+    rnd_vals = []
+    for v in points.data.vertices:
+        r = float(rng.random())
+        made = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.0006)
+        for nv in made["verts"]:
+            nv.co += v.co
+        rnd_vals += [r] * len(made["verts"])
+    bpy.data.objects.remove(points)
+    dme = bpy.data.meshes.new("ScanDots")
+    bm.to_mesh(dme)
+    bm.free()
+    attr = dme.attributes.new("rnd", "FLOAT", "POINT")
+    attr.data.foreach_set("value", rnd_vals)
+    dots = bpy.data.objects.new("ScanDots", dme)
+    sc.collection.objects.link(dots)
+    dots.data.materials.append(glow_mat("ScanDot", "dots", 1.9, rnd=True))
+
+    wf = scan.modifiers.new("wire", "WIREFRAME")
+    wf.thickness = 0.00034
+    wf.use_even_offset = True
+    scan.data.materials.append(glow_mat("ScanLine", "wire", 1.75))
+    for o in (scan, dots):
+        o.visible_shadow = False
+    sc.cycles.transparent_max_bounces = 64  # stacked hidden layers must not block light or the camera
+    print("scan mesh", len(scan.data.polygons), "faces,", len(scan.data.vertices), "points", flush=True)
+    return ng
+
+
+def animate_intro(ng, cam, target):
+    _, _, _, az1, el1, dist1, tz = pose(0.0)
+    az0, el0, dist0 = math.radians(-78), math.radians(26), 0.9
+    vals = {n: ng.nodes[n].outputs[0] for n in ("H", "WIRE", "DOTS")}
+    for f in (0, FRAMES - 1):  # the scroll film always shows the finished burger
+        vals["H"].default_value, vals["WIRE"].default_value, vals["DOTS"].default_value = SCAN_HIGH, 0.0, 0.0
+        for v in vals.values():
+            v.keyframe_insert("default_value", frame=f)
+    for i in range(INTRO_FRAMES):
+        f = INTRO_AT + i
+        t = i / (INTRO_FRAMES - 1)
+        dots, wire, h, e = intro_curves(t)
+        vals["H"].default_value, vals["WIRE"].default_value, vals["DOTS"].default_value = h, wire, dots
+        for v in vals.values():
+            v.keyframe_insert("default_value", frame=f)
+        az, el, dist = az0 + (az1 - az0) * e, el0 + (el1 - el0) * e, dist0 + (dist1 - dist0) * e
+        target.location = (0, 0, tz)
+        target.keyframe_insert("location", frame=f)
+        cam.location = (dist * math.cos(el) * math.cos(az), dist * math.cos(el) * math.sin(az), tz + dist * math.sin(el))
+        cam.keyframe_insert("location", frame=f)
+
+
+def setup(intro=False):
     make_textures()
     groups = build()
     cam, target = stage()
     animate(groups, cam, target)
     write_timeline()
+    if intro:
+        animate_intro(scan_setup(), cam, target)
     return groups
 
 
@@ -745,7 +974,7 @@ def render_frames(frames, scale=100, folder=RAW):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    setup()
+    setup(intro=any(a.startswith("--intro") for a in args))
     if "--still" in args:
         rest = args[args.index("--still") + 1 :]
         frames = [int(a) for a in rest[: next((i for i, a in enumerate(rest) if a.startswith("--")), len(rest))]]
@@ -760,6 +989,39 @@ if __name__ == "__main__":
                     seen.add(f)
                     order.append(f)
         render_frames(order + [FRAMES - 1])
+    if "--intro-still" in args:  # intro frames 0..INTRO_FRAMES-1, half size unless --full
+        rest = args[args.index("--intro-still") + 1 :]
+        frames = [int(a) for a in rest[: next((i for i, a in enumerate(rest) if a.startswith("--")), len(rest))]]
+        if "--samples" in args:
+            bpy.context.scene.cycles.samples = int(args[args.index("--samples") + 1])
+        sc = bpy.context.scene
+        sc.render.resolution_percentage = 100 if "--full" in args else 50
+        os.makedirs(os.path.join(ROOT, "blender", "stills"), exist_ok=True)
+        for i in frames:
+            sc.frame_set(INTRO_AT + i)
+            sc.render.filepath = os.path.join(ROOT, "blender", "stills", f"intro_{i:03d}.png")
+            bpy.ops.render.render(write_still=True)
+            print("rendered", sc.render.filepath, flush=True)
+    if "--intro" in args:  # all intro frames into blender/render_intro (resumable)
+        sc = bpy.context.scene
+        half = "--half" in args  # preview size, kept apart from the full renders
+        sc.render.resolution_percentage = 50 if half else 100
+        folder = RAW_INTRO + ("_half" if half else "")
+        os.makedirs(folder, exist_ok=True)
+        order, seen = [], set()
+        for step in (8, 4, 2, 1):
+            for i in range(0, INTRO_FRAMES, step):
+                if i not in seen:
+                    seen.add(i)
+                    order.append(i)
+        for i in order + [INTRO_FRAMES - 1]:
+            out = os.path.join(folder, f"{i:04d}.png")
+            if os.path.exists(out):
+                continue
+            sc.frame_set(INTRO_AT + i)
+            sc.render.filepath = out
+            bpy.ops.render.render(write_still=True)
+            print("rendered", out, flush=True)
     if "--export" in args:
         export_models()
     if "--blend" in args:

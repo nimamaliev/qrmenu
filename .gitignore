@@ -46,5 +46,6 @@ next-env.d.ts
 # Blender working files (frames are packed into public/hero)
 /blender/render/
 /blender/stills/
+/blender/render_intro*/
 /blender/tex/
 /blender/*.blend*
