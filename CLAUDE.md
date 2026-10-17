@@ -109,6 +109,13 @@ Decided / waiting on the user:
 - Claims to confirm before launch: which phones support the AR view; that
   restaurants can edit dishes and prices themselves.
 
+Parked (2026-10-17): an Anatomy-style isometric "How it works" figure (camera +
+turntable -> monitor builds the 3D model -> printer issues the QR card -> phone
+shows the dish), approved by the user but to be added to the site later.
+Preview and build script in `prototypes/how-it-works/` (`ANATOMY_DIR=... node
+build.mjs`). To ship it: port to React per the skill's `references/react.md`,
+move the step texts and readouts into the dictionaries (5 languages).
+
 Next up: the user's feedback on the burger film and the QR demo (and AR tests
 on their phones); possibly a separate Pricing page. Before opening another MotionSites prompt, show the user a
 shortlist (only 2 free opens left).
