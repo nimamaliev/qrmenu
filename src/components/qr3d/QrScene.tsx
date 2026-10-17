@@ -16,7 +16,7 @@ const SEASONS: Record<Season, { tiles: string[]; grass: string[]; leaves: string
   // tile colours are what the scanner sees: all dark enough against the cream ground
   spring: { tiles: ["#2a5f33", "#336c38", "#244f33", "#3a6a2c"], grass: ["#6fae4a", "#8cc35a", "#5c9a3e"], leaves: ["#f4a6c0", "#f7c6d5", "#fbe3ea", "#e98aac"], light: "#f6f1e6" },
   summer: { tiles: ["#2e5e27", "#3d6f2c", "#24502a", "#4a6a24"], grass: ["#5d9a35", "#79b345", "#4f8a2f"], leaves: ["#4f8f36", "#68a83f", "#3f7a2e", "#86b84c"], light: "#f5f0e4" },
-  autumn: { tiles: ["#a8441b", "#b8581c", "#7c5418", "#6a6420"], grass: ["#e3a62f", "#d48b23", "#c9b03b"], leaves: ["#f0a030", "#e8822a", "#f6b94a", "#d9661f"], light: "#f4eee1" },
+  autumn: { tiles: ["#983d17", "#a54d19", "#7c5418", "#6a6420"], grass: ["#e3a62f", "#d48b23", "#c9b03b"], leaves: ["#f0a030", "#e8822a", "#f6b94a", "#d9661f"], light: "#f4eee1" },
 };
 
 type Props = { url: string; labels: { toQr: string; to3d: string; seasons: Record<Season, string> } };

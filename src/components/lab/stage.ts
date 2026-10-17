@@ -26,7 +26,8 @@ export async function createStage(el: HTMLElement, opts: { look: Look; palette: 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const small = innerWidth < 768;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, small ? 1.5 : 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   if (opts.look === "clay") {
     renderer.shadowMap.enabled = true;
@@ -45,7 +46,7 @@ export async function createStage(el: HTMLElement, opts: { look: Look; palette: 
     const sun = new THREE.DirectionalLight(0xffffff, 2.1);
     sun.position.set(-9, 16, 10);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.setScalar(small ? 1024 : 2048);
     Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 10, bottom: -10, near: 1, far: 50 });
     sun.shadow.bias = -0.0005;
     sun.shadow.radius = 5;
@@ -63,6 +64,9 @@ export async function createStage(el: HTMLElement, opts: { look: Look; palette: 
 
   let dirty = true;
   let visible = false;
+  // Portrait screens see less sideways: pull the camera back from its target so the room fits.
+  let fit = 1;
+  const eye = new THREE.Vector3();
   let frameFn: (() => void) | undefined;
   const v3 = new THREE.Vector3();
   let raf = 0;
@@ -74,7 +78,10 @@ export async function createStage(el: HTMLElement, opts: { look: Look; palette: 
     const k = reduced ? 1 : 1 - Math.exp(-dt * 4.5);
     pos.lerp(view.pos, k);
     target.lerp(view.target, k);
-    camera.position.copy(pos);
+    // wide shots need more room than close-ups: scale the pull-back with the shot's distance
+    const d = pos.distanceTo(target);
+    const f = fit ** (0.8 + 0.25 * Math.min(1, Math.max(0, (d - 10) / 15)));
+    camera.position.copy(eye.copy(pos).sub(target).multiplyScalar(f).add(target));
     camera.lookAt(target);
     renderer.render(scene, camera);
     frameFn?.();
@@ -96,6 +103,7 @@ export async function createStage(el: HTMLElement, opts: { look: Look; palette: 
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    fit = Math.min(4, Math.max(1, 1.6 / camera.aspect));
     invalidate();
   };
   const ro = new ResizeObserver(resize);
