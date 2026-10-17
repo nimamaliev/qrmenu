@@ -135,12 +135,19 @@ shows the dish), with the four steps under it. The server builds the SVG once
 offscreen, rests on the last station under reduced motion. Kit (MIT) vendored in
 `src/components/iso/`. Words in `how.figure` in the dictionaries.
 
-In progress (2026-10-17): a 3D QR (after a reel of louisraille.fr the user
-shared): dark modules are blocks of varied height, the burger stands on a plate
-in the middle; as the camera rises to straight above (scroll, or tap) the blocks
-settle and it scans (error correction H, checked with jsQR on screenshots).
-`components/qr3d/QrScene.tsx`, unlinked noindex test page `/[lang]/lab/qr`.
-If approved it replaces the flat QR in "Try it yourself" (then delete the lab).
+In progress (2026-10-17): the user wants the 3D burger OUT of the hero (too toy-like)
+and a new concept after lightgearlab.com + vectrfl.com (research to write up). Three
+previews, unlinked noindex: `/[lang]/lab/concept-1` (clay miniature restaurant on
+paper + tomato, numbered steps, then it comes apart into labelled layers),
+`concept-2` (pale-blue Vectr-style fly-over), `concept-3` (line drawing in a box on
+bold full-page colours). Shared code in `src/components/lab/` (procedural restaurant
+kit, stage, `ConceptStory`, configs with draft copy). Waiting for the user's pick.
+The 3D burger STAYS as the hook in "Try it yourself" and on /demo.
+
+3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): redone like the
+user's louisraille.fr reel: grass tufts on coloured tiles, a tree in the middle,
+Spring/Summer/Autumn; from straight above the tree shrinks away and it scans
+(all three seasons checked with jsQR). Not on the homepage yet.
 
 Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
 is in `docs/research/igloo-inc.md`; Ciao Energy and FIX Chocolatier in
