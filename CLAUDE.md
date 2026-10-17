@@ -37,6 +37,11 @@ point at the product, while staying responsive on mobile, accessible
 ## Stack
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
+Animation: `motion` (React), CSS scroll timelines, and GSAP 3.15 (free incl. all
+plugins, gsap.com/standard-license) with `@gsap/react`: import from `@/lib/gsap`
+(registers ScrollTrigger, SplitText, Flip once; rarer plugins are imported where
+used), animate inside `useGSAP` in Client Components, gate with `gsap.matchMedia()`
++ `REDUCED_OK`. three.js 0.183 (pinned to model-viewer's version) for live 3D.
 
 ## Tools to reach for
 
