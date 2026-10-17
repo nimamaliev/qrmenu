@@ -136,7 +136,7 @@ offscreen, rests on the last station under reduced motion. Kit (MIT) vendored in
 `src/components/iso/`. Words in `how.figure` in the dictionaries.
 
 In progress (2026-10-17): the user wants the 3D burger OUT of the hero (too toy-like)
-and a new concept after lightgearlab.com + vectrfl.com (research to write up). Three
+and a new concept after lightgearlab.com + vectrfl.com (`docs/research/lightgearlab-vectr.md`). Three
 previews, unlinked noindex: `/[lang]/lab/concept-1` (clay miniature restaurant on
 paper + tomato, numbered steps, then it comes apart into labelled layers),
 `concept-2` (pale-blue Vectr-style fly-over), `concept-3` (line drawing in a box on
