@@ -116,6 +116,10 @@ Preview and build script in `prototypes/how-it-works/` (`ANATOMY_DIR=... node
 build.mjs`). To ship it: port to React per the skill's `references/react.md`,
 move the step texts and readouts into the dictionaries (5 languages).
 
+Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
+is in `docs/research/igloo-inc.md`. awwwards.com resets connections from cloud
+sessions (even with domain access).
+
 Next up: the user's feedback on the burger film and the QR demo (and AR tests
 on their phones); possibly a separate Pricing page. Before opening another MotionSites prompt, show the user a
 shortlist (only 2 free opens left).
