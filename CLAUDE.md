@@ -144,10 +144,12 @@ bold full-page colours). Shared code in `src/components/lab/` (procedural restau
 kit, stage, `ConceptStory`, configs with draft copy). Waiting for the user's pick.
 The 3D burger STAYS as the hook in "Try it yourself" and on /demo.
 
-3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): redone like the
-user's louisraille.fr reel: grass tufts on coloured tiles, a tree in the middle,
-Spring/Summer/Autumn; from straight above the tree shrinks away and it scans
-(all three seasons checked with jsQR). Not on the homepage yet.
+3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): rebuilt (2026-10-18) from
+the user's louisraille.fr reel frames: a tall tree whose leaves are square plates stacked only
+above the code's dark squares, grey paving with fallen leaves, tall grass on the edges and finder
+corners, rain in autumn; an orthographic camera turns from isometric to straight above, where it
+scans (all seasons checked with jsQR on downscaled shots; per-season `deep` darkens leaf tops).
+Not on the homepage yet.
 
 Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
 is in `docs/research/igloo-inc.md`; Ciao Energy and FIX Chocolatier in
