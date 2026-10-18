@@ -144,6 +144,16 @@ bold full-page colours). Shared code in `src/components/lab/` (procedural restau
 kit, stage, `ConceptStory`, configs with draft copy). Waiting for the user's pick.
 The 3D burger STAYS as the hook in "Try it yourself" and on /demo.
 
+In progress (2026-10-18): the user liked the concepts' idea but found them sloppy (lines crossing,
+"sketch" look). New direction, after LightGearLab's frames: **floor story** preview at
+`/[lang]/lab/floor` (`components/lab/floor/`): a real QR code rises into a mini restaurant
+(finder squares = kitchen/bar/till rooms, timing rows = planters, other dark squares = tables,
+chairs on free squares) -> camera dives into a table's menu card -> digital menu -> line-drawing
+chapters on saffron/tomato/basil (order, kitchen, bill) -> floor inside a dashboard frame with
+status colours -> analytics bars. One merged-geometry scene, one shader `rise`; clay and line looks
+share meshes (paper-coloured faces + 20° edges + inverted-hull outlines, LightGearLab's method).
+Draft copy, sample data: confirm the dashboard features before any of it goes on the homepage.
+
 3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): rebuilt (2026-10-18) from
 the user's louisraille.fr reel frames: a tall tree whose leaves are square plates stacked only
 above the code's dark squares, grey paving with fallen leaves, tall grass on the edges and finder
