@@ -25,6 +25,7 @@ export type FloorState = {
   dish: number; // 0 hidden .. 1 the 3D dish fully revealed on its plate
   bars: number; // analytics bars grow out of the tables
   morph: number; // 0 bars on tables .. 1 bricks stacked into the hourly chart
+  gone: number; // 0 the floor shows .. 1 it has faded into the page (only the chart is left)
   route: string; // colour of the order/bill lines (must stand out on the page colour)
   order: number; // table -> kitchen route drawn
   bill: number; // table -> till route drawn
@@ -35,6 +36,13 @@ export type Floor = {
   /** Floor size in world units (code + quiet zone). */
   size: number;
   spots: { hero: T.Vector3; book: T.Vector3; page: T.Vector3; dish: T.Vector3; kitchen: T.Vector3; bar: T.Vector3; till: T.Vector3; chart: T.Vector3 };
+  /**
+   * Where the hourly chart's columns are, in world units on the plane z = spots.chart.z, in front of
+   * the floor (centre x and height per
+   * column, shared width and baseline). The story measures the dashboard's real chart and passes
+   * it here, so the bricks land exactly on its bars.
+   */
+  setChart: (x: number[], h: number[], width: number, baseY: number) => void;
   /** Put the real dish (a loaded glTF scene, in metres) on the hero table's plate. */
   addDish: (dish: T.Object3D) => void;
   set: (s: FloorState) => void;
@@ -280,20 +288,21 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     }
   });
 
-  // ---- analytics: one bar per table; each later flies to a slot in the hourly chart as a brick
+  // ---- analytics: one bar per table; each later flies to a slot in the hourly chart as a brick.
+  // A slot is (column, start, end) as fractions of the column; the columns themselves are uniforms.
   const HMAX = 14;
-  const GAP = 1.9;
   const peak = ORDERS_PER_HOUR.indexOf(Math.max(...ORDERS_PER_HOUR));
   const total = ORDERS_PER_HOUR.reduce((a, b) => a + b, 0);
   // bricks per hour column, in proportion to that hour's orders (largest remainder)
   const raw = ORDERS_PER_HOUR.map((v) => (v / total) * tables.length);
   const counts = raw.map(Math.floor);
   raw.map((v, i) => [v - Math.floor(v), i] as const).sort((a, b) => b[0] - a[0]).slice(0, tables.length - counts.reduce((a, b) => a + b, 0)).forEach(([, i]) => counts[i]++);
-  const slots: { to: [number, number, number]; h: number; col: string; k: number }[] = [];
+  // the dashboard's colours: accent for the peak hour, accent at 45% on its card for the rest
+  const slots: { at: [number, number, number]; col: string; k: number }[] = [];
   counts.forEach((cnt, j) => {
-    const colH = (ORDERS_PER_HOUR[j] / ORDERS_PER_HOUR[peak]) * HMAX;
-    for (let k = 0; k < cnt; k++) slots.push({ to: [(j - (ORDERS_PER_HOUR.length - 1) / 2) * GAP, (k * colH) / cnt, 0], h: colH / cnt - 0.07, col: j === peak ? COLORS.tomato : "#e2a294", k: j / ORDERS_PER_HOUR.length });
+    for (let k = 0; k < cnt; k++) slots.push({ at: [j, k / cnt, (k + 1) / cnt], col: j === peak ? COLORS.tomato : "#d29486", k: j / ORDERS_PER_HOUR.length });
   });
+  const HOURS_N = ORDERS_PER_HOUR.length;
   const barGeos: T.BufferGeometry[] = [];
   const barEdgeGeos: T.BufferGeometry[] = [];
   const unit = box(1, 1, 1);
@@ -311,8 +320,8 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     col.set(slot.col);
     const per = (g: T.BufferGeometry, fill: boolean) => {
       vec(g, "aFrom", [t.x, TOP, t.z]);
-      vec(g, "aTo", slot.to);
-      vec(g, "aDims", [0.6 + v * 4.2, slot.h, 0.6 * (1 - v), Math.min(1, slot.k + rand() * 0.15)]); // height on table, brick height, rise delay, fly stagger
+      vec(g, "aSlot", slot.at);
+      vec(g, "aDims", [0.6 + v * 4.2, 0.6 * (1 - v), Math.min(1, slot.k + rand() * 0.15)]); // height on table, rise delay, fly stagger
       if (fill) {
         vec(g, "color", from);
         vec(g, "aColTo", [col.r, col.g, col.b]);
@@ -340,6 +349,12 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     uRise: { value: 0 },
     uBars: { value: 0 },
     uMorph: { value: 0 },
+    uGone: { value: 0 },
+    // until the story measures the dashboard: a chart standing in the middle of the floor
+    uColX: { value: ORDERS_PER_HOUR.map((_, j) => (j - (ORDERS_PER_HOUR.length - 1) / 2) * 1.9) },
+    uColH: { value: ORDERS_PER_HOUR.map((v) => (v / Math.max(...ORDERS_PER_HOUR)) * 14) },
+    uColW: { value: 1.3 },
+    uBaseY: { value: 0 },
     uLine: { value: 0 },
     uAdmin: { value: 0 },
     uPaper: { value: new THREE.Color(COLORS.floor) },
@@ -377,30 +392,37 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const lineMat = grow(new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true, opacity: 0 }), "uRise");
   const hullMat = grow(new THREE.MeshBasicMaterial({ color: "#0d0c0b", side: THREE.BackSide, transparent: true, opacity: 0 }), "uRise", { push: true });
   const depth = () => grow(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), "uRise");
-  // bars: grow on their table, then fly in an arc to their brick slot, changing colour
+  // bars: grow on their table, then fly in an arc to their slot in the chart, thin down to flat
+  // bars and take the chart's flat colour, so they become the dashboard's bars
   const flyVertex = (fill: boolean) => `
-    float rr = clamp((uBars - aDims.z) / 0.35, 0.0, 1.0);
+    float rr = clamp((uBars - aDims.y) / 0.35, 0.0, 1.0);
     float uu = rr - 1.0;
     float kk = rr <= 0.0 ? 0.0 : 1.0 + 2.70158 * uu * uu * uu + 1.70158 * uu * uu;
-    float mm = smoothstep(0.0, 1.0, clamp((uMorph - aDims.w * 0.55) / 0.45, 0.0, 1.0));
-    float w = mix(0.56, 1.3, mm);
-    float h = max(mix(aDims.x * kk, aDims.y, mm), 0.0001);
-    vec3 base = mix(aFrom, aTo, mm) + vec3(0.0, sin(mm * 3.14159) * 4.0, 0.0);
-    vec3 transformed = vec3(position.x * w, position.y * h, position.z * w) + base;
+    float mm = smoothstep(0.0, 1.0, clamp((uMorph - aDims.z * 0.55) / 0.45, 0.0, 1.0));
+    int j = int(aSlot.x + 0.5);
+    vec3 to = vec3(uColX[j], uBaseY + aSlot.y * uColH[j], ${(size / 2 + 1).toFixed(2)});
+    float hTo = max((aSlot.z - aSlot.y) * uColH[j] - 0.06 * (1.0 - mm), 0.0001);
+    float wx = mix(0.56, uColW, mm);
+    float wz = mix(0.56, 0.02, mm);
+    float h = max(mix(aDims.x * kk, hTo, mm), 0.0001);
+    vec3 base = mix(aFrom, to, mm) + vec3(0.0, sin(mm * 3.14159) * 4.0, 0.0);
+    vec3 transformed = vec3(position.x * wx, position.y * h, (position.z - 0.5 * mm) * wz) + base;
     if (rr <= 0.0) transformed.y -= 1.0;
-    ${fill ? "vColor.rgb = mix(color.rgb, aColTo, mm);" : ""}`;
+    ${fill ? "vColor.rgb = mix(color.rgb, aColTo, mm); vFlat = aColTo; vMM = mm * mm;" : ""}`;
   const fly = <M extends T.Material>(m: M, fill: boolean): M => {
     m.onBeforeCompile = (sh) => {
-      sh.uniforms.uBars = U.uBars;
-      sh.uniforms.uMorph = U.uMorph;
+      Object.assign(sh.uniforms, { uBars: U.uBars, uMorph: U.uMorph, uColX: U.uColX, uColH: U.uColH, uColW: U.uColW, uBaseY: U.uBaseY });
       sh.vertexShader =
-        `attribute vec3 aFrom;\nattribute vec3 aTo;\nattribute vec4 aDims;\nuniform float uBars;\nuniform float uMorph;\n${fill ? "attribute vec3 aColTo;\n" : ""}` +
+        `attribute vec3 aFrom;\nattribute vec3 aSlot;\nattribute vec3 aDims;\nuniform float uBars;\nuniform float uMorph;\nuniform float uColX[${HOURS_N}];\nuniform float uColH[${HOURS_N}];\nuniform float uColW;\nuniform float uBaseY;\n${fill ? "attribute vec3 aColTo;\nvarying vec3 vFlat;\nvarying float vMM;\n" : ""}` +
         sh.vertexShader.replace("#include <begin_vertex>", flyVertex(fill));
+      if (fill)
+        sh.fragmentShader =
+          "varying vec3 vFlat;\nvarying float vMM;\n" + sh.fragmentShader.replace("#include <opaque_fragment>", "#include <opaque_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, vFlat, vMM);");
     };
     return m;
   };
   const bars = new THREE.Mesh(merge(barGeos), fly(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }), true));
-  const barLineMat = fly(new THREE.LineBasicMaterial({ color: "#0d0c0b" }), false);
+  const barLineMat = fly(new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true }), false);
   const barLines = new THREE.LineSegments(merge(barEdgeGeos), barLineMat);
   bars.frustumCulled = barLines.frustumCulled = false; // they fly far from where their geometry starts
 
@@ -415,8 +437,8 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     uniforms: U,
     vertexShader: `attribute float aDelay; uniform float uRise; varying float vK;
       void main() { vK = clamp((uRise - aDelay) / 0.35, 0.0, 1.0); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `uniform vec3 uInk; uniform vec3 uTile; uniform vec3 uPaper; uniform float uLine; varying float vK;
-      void main() { vec3 c = mix(uInk, uTile, smoothstep(0.0, 1.0, vK)); gl_FragColor = vec4(mix(c, uPaper, uLine * 0.9), 1.0);
+    fragmentShader: `uniform vec3 uInk; uniform vec3 uTile; uniform vec3 uPaper; uniform float uLine; uniform float uGone; varying float vK;
+      void main() { vec3 c = mix(uInk, uTile, smoothstep(0.0, 1.0, vK)); gl_FragColor = vec4(mix(c, uPaper, max(uLine * 0.9, uGone)), 1.0);
       #include <colorspace_fragment>
       }`,
   });
@@ -488,6 +510,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
       g.font = `30px ${serif}`;
       g.fillText(name, 60, y);
       g.textAlign = "right";
+      g.font = `30px "Times New Roman", Times, "Liberation Serif", serif`;
       g.fillText(price, 452, y);
       g.textAlign = "left";
       g.fillStyle = "#8a8884";
@@ -568,7 +591,13 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   return {
     root,
     size,
-    spots: { hero, book: bookAt.clone().setY(TOP + BT), page: pageAt, dish: dishBase, kitchen, bar, till, chart: new THREE.Vector3(0, HMAX / 2, 0) },
+    spots: { hero, book: bookAt.clone().setY(TOP + BT), page: pageAt, dish: dishBase, kitchen, bar, till, chart: new THREE.Vector3(0, HMAX / 2, size / 2 + 1) },
+    setChart: (x, h, width, baseY) => {
+      U.uColX.value = x;
+      U.uColH.value = h;
+      U.uColW.value = width;
+      U.uBaseY.value = baseY;
+    },
     addDish: (d) => {
       d.position.copy(dishBase);
       d.traverse((o) => {
@@ -582,13 +611,16 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     },
     set: (s) => {
       U.uRise.value = s.rise;
-      U.uLine.value = s.line;
+      // fading away: faces turn page-coloured and the lines melt into the page too
+      U.uLine.value = s.line + (1 - s.line) * s.gone;
+      U.uGone.value = s.gone;
       U.uAdmin.value = s.admin;
       U.uPaper.value.set(s.paper);
       lineMat.color.set(s.ink);
       hullMat.color.set(s.ink);
-      lineMat.opacity = hullMat.opacity = s.line;
-      lines.visible = hull.visible = s.line > 0.01;
+      lineMat.opacity = hullMat.opacity = s.line * (1 - s.gone);
+      lines.visible = hull.visible = s.line > 0.01 && s.gone < 0.999;
+      fill.visible = tiles.visible = s.gone < 0.999;
       // the book and plate arrive with the rest of the room
       const here = Math.min(1, Math.max(0.001, (s.rise - 0.55) * 2.5));
       book.visible = plate.visible = s.rise > 0.55;
@@ -605,6 +637,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
       U.uMorph.value = s.morph;
       bars.visible = barLines.visible = s.bars > 0.001;
       barLineMat.color.set(s.ink);
+      barLineMat.opacity = 1 - s.morph * s.morph; // the bricks' seams melt away as they become bars
       routeMat.color.set(s.route);
       orderRoute(s.order);
       billRoute(s.bill);

@@ -261,7 +261,7 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
             {ORDERS_PER_HOUR.map((v, i) => (
               <span key={i} className="flex h-full flex-1 items-end" onMouseEnter={() => setHoverHour(i)}>
                 <span
-                  className={`w-full max-w-6 rounded-t-[4px] transition-colors ${i === shownHour ? "bg-accent" : "bg-accent/45"}`}
+                  data-hour-bar className={`w-full max-w-6 rounded-t-[4px] transition-colors ${i === shownHour ? "bg-accent" : "bg-accent/45"}`}
                   style={{ height: `${(v / maxHour) * 100}%` }}
                 />
               </span>

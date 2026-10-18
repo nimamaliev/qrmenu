@@ -131,8 +131,9 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         [0.852, O, R * 1.6, 0.4, 0, 1],
         [0.892, up(O, 1.6), R * 1.2, 52, 36, 1],
         [0.905, up(O, 1.6), R * 1.18, 53, 37, 1],
-        [0.948, S.chart, 68, 84, 0, 1],
-        [1, S.chart, 68, 84, 0, 1],
+        // straight-on at the end, so the chart's plane faces the screen like the dashboard does
+        [0.948, S.chart, 68, 90, 0, 1],
+        [1, S.chart, 68, 90, 0, 1],
       ];
       const tgt = new THREE.Vector3();
       const view = (q: number) => {
@@ -161,6 +162,37 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
       const dashEl = wrap.querySelector<HTMLElement>("[data-dash]");
       const dashInner = wrap.querySelector<HTMLElement>("[data-dash-inner]");
       const scrims = Array.from(wrap.querySelectorAll<HTMLElement>("[data-scrim]"));
+      // the dashboard's hourly bars, measured on screen and mapped onto the 3D chart's plane
+      const hourBars = Array.from(wrap.querySelectorAll<HTMLElement>("[data-hour-bar]"));
+      const ray = new THREE.Raycaster();
+      const chartPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -S.chart.z);
+      const hit = new THREE.Vector3();
+      const ndc = new THREE.Vector2();
+      const toPlane = (x: number, y: number, box: DOMRect) => {
+        ndc.set(((x - box.left) / box.width) * 2 - 1, -((y - box.top) / box.height) * 2 + 1);
+        ray.setFromCamera(ndc, camera);
+        return ray.ray.intersectPlane(chartPlane, hit) ? hit.clone() : null;
+      };
+      const measureChart = () => {
+        const box = el.getBoundingClientRect();
+        const xs: number[] = [];
+        const hs: number[] = [];
+        let width = 0;
+        let base = 0;
+        for (const bar of hourBars) {
+          const r = bar.getBoundingClientRect();
+          const bl = toPlane(r.left, r.bottom, box);
+          const br = toPlane(r.right, r.bottom, box);
+          const tl = toPlane(r.left, r.top, box);
+          if (!bl || !br || !tl) return;
+          xs.push((bl.x + br.x) / 2);
+          hs.push(tl.y - bl.y);
+          width += (br.x - bl.x) / hourBars.length;
+          base += bl.y / hourBars.length;
+        }
+        floor.setChart(xs, hs, width, base);
+      };
+      let fitS = 1;
       const show = (node: HTMLElement, o: number, dy: number) => {
         node.style.opacity = String(o);
         node.style.transform = `translateY(${(1 - o) * dy}px)`;
@@ -209,12 +241,19 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
           adminEl.dataset.tab = q > 0.856 ? "analytics" : "floor";
         }
         if (dashEl && dashInner) {
-          const d = ramp(q, 0.95, 0.964);
-          show(dashEl, d, 40);
+          // the dashboard waits, laid out but invisible, with its hourly chart in view: the bricks
+          // land on its bars, then it fades in over them and the 3D scene fades away
+          const d = ramp(q, 0.946, 0.958);
+          dashEl.style.opacity = String(d);
+          dashEl.style.visibility = d < 0.01 ? "hidden" : "visible";
           dashEl.style.pointerEvents = d > 0.9 ? "auto" : "none";
-          const room = Math.max(0, dashInner.offsetHeight - dashEl.clientHeight);
-          dashInner.style.transform = `translateY(${-room * smooth(ramp(q, 0.968, 0.996))}px)`;
+          // on wide screens it's scaled to fit its frame; on phones it scrolls up from the chart
+          fitS = el.clientWidth >= 1024 ? Math.min(1, dashEl.clientHeight / Math.max(1, dashInner.offsetHeight)) : 1;
+          dashInner.style.width = `${100 / fitS}%`;
+          const room = Math.max(0, dashInner.offsetHeight * fitS - dashEl.clientHeight);
+          dashInner.style.transform = `translateY(${-room * (1 - smooth(ramp(q, 0.966, 0.996)))}px) scale(${fitS})`;
         }
+        el.style.opacity = String(1 - ramp(q, 0.954, 0.966));
 
         // page colours
         const th = themeAt(q);
@@ -235,6 +274,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
           dish: ramp(q, 0.458, 0.5),
           bars: ramp(q, 0.858, 0.9),
           morph,
+          gone: smooth(ramp(q, 0.9, 0.935)),
           route: th.route,
           order: ramp(q, 0.582, 0.625) * (1 - ramp(q, 0.79, 0.81)),
           bill: ramp(q, 0.737, 0.775) * (1 - ramp(q, 0.79, 0.81)),
@@ -257,6 +297,8 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         if (desk) camera.setViewOffset(w, h, -side * 0.2 * w, 0, w, h);
         else camera.setViewOffset(w, h, 0, 0.11 * h, w, h);
         camera.updateProjectionMatrix();
+        camera.updateMatrixWorld();
+        if (q > 0.86) measureChart();
         renderer.render(scene, camera);
 
         const settled = q === p && Math.abs(side - want) < 1e-3;
@@ -409,7 +451,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
 
         {/* the owner dashboard itself, scrolled through as the story ends */}
         <div data-dash className="invisible absolute inset-x-3 top-20 bottom-[34svh] overflow-hidden rounded-3xl opacity-0 sm:inset-x-auto sm:top-[8svh] sm:right-[3vw] sm:bottom-[6svh] sm:w-[min(58vw,62rem)] [&_.reveal]:[animation:none]">
-          <div data-dash-inner className="text-text">
+          <div data-dash-inner className="origin-top-left text-text">
             <OwnerDashboard lang={lang} owners={owners} menu={menu} />
           </div>
         </div>
