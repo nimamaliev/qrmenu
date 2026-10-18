@@ -14,7 +14,8 @@ import { buildFloor, STATUS, type Floor } from "./scene";
  * QR code -> it rises into a mini restaurant -> the camera comes to a table where a menu book
  * opens on a dish with its own QR code -> the real 3D dish appears on the plate (the hook) ->
  * line-drawing chapters on bold page colours (order, kitchen, bill) -> the floor seen from above
- * in the dashboard -> the owner dashboard itself, scrolled through. Copy is draft.
+ * in the dashboard -> analytics bars grow out of the tables and fly together as bricks into the
+ * hourly chart -> the owner dashboard itself, scrolled through. Copy is draft.
  */
 
 type Side = "l" | "r";
@@ -27,15 +28,16 @@ const CHAPTERS: Chapter[] = [
   { from: 0.575, to: 0.63, side: "r", eyebrow: "05 · Order", title: "Order from the table", text: "The order goes straight to the kitchen, with the table number on it." },
   { from: 0.655, to: 0.705, side: "l", eyebrow: "06 · Kitchen", title: "The kitchen knows", text: "Who ordered what, and how long each table has been waiting." },
   { from: 0.73, to: 0.785, side: "r", eyebrow: "07 · Bill", title: "The bill, without the wait", text: "Each bill follows its table, so paying takes a minute." },
-  { from: 0.815, to: 0.865, side: "l", eyebrow: "08 · Your floor, live", title: "The whole room on one screen", text: "Which tables are free, eating, waiting or paying, at a glance.", legend: true },
-  { from: 0.885, to: 1.01, side: "l", eyebrow: "09 · Analytics", title: "Know what sells", text: "Sales, top dishes, peak hours and 3D views, from the same system." },
+  { from: 0.815, to: 0.855, side: "l", eyebrow: "08 · Your floor, live", title: "The whole room on one screen", text: "Which tables are free, eating, waiting or paying, at a glance.", legend: true },
+  { from: 0.862, to: 1.01, side: "l", eyebrow: "09 · Analytics", title: "Know what sells", text: "Every table's orders add up: sales, top dishes, peak hours and 3D views, from the same system." },
 ];
 
-type Theme = { bg: string; fg: string; muted: string; ink: string };
-const PAPER: Theme = { bg: "#f2f0ec", fg: "#0d0c0b", muted: "#5f5e5c", ink: "#0d0c0b" };
-const SAFFRON: Theme = { bg: "#f0c24f", fg: "#1a1712", muted: "#4f4120", ink: "#1a1712" };
-const TOMATO: Theme = { bg: "#b83219", fg: "#fff7f2", muted: "#ffd9cc", ink: "#2b0c05" };
-const BASIL: Theme = { bg: "#1d3b2e", fg: "#eef4ee", muted: "#a9c2b2", ink: "#e3ede6" };
+// route: the order/bill line, picked to stand out on each page colour
+type Theme = { bg: string; fg: string; muted: string; ink: string; route: string };
+const PAPER: Theme = { bg: "#f2f0ec", fg: "#0d0c0b", muted: "#5f5e5c", ink: "#0d0c0b", route: "#b83219" };
+const SAFFRON: Theme = { bg: "#f0c24f", fg: "#1a1712", muted: "#4f4120", ink: "#1a1712", route: "#b83219" };
+const TOMATO: Theme = { bg: "#b83219", fg: "#fff7f2", muted: "#ffd9cc", ink: "#2b0c05", route: "#fff1dc" };
+const BASIL: Theme = { bg: "#1d3b2e", fg: "#eef4ee", muted: "#a9c2b2", ink: "#e3ede6", route: "#f0c24f" };
 const THEMES: [number, Theme][] = [
   [0, PAPER],
   [0.555, PAPER],
@@ -126,7 +128,11 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         [0.73, up(S.till, 0.8), 23, 50, 58, 0.75],
         [0.78, up(S.till, 0.8), 21, 50, 66, 0.75],
         [0.82, O, R * 1.6, 0.4, 0, 1],
-        [1, O, R * 1.6, 0.4, 0, 1],
+        [0.852, O, R * 1.6, 0.4, 0, 1],
+        [0.892, up(O, 1.6), R * 1.2, 52, 36, 1],
+        [0.905, up(O, 1.6), R * 1.18, 53, 37, 1],
+        [0.948, S.chart, 68, 84, 0, 1],
+        [1, S.chart, 68, 84, 0, 1],
       ];
       const tgt = new THREE.Vector3();
       const view = (q: number) => {
@@ -146,7 +152,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         const [pb, B] = THEMES[i + 1];
         const t = smooth(ramp(q, pa, pb));
         const mix = (x: string, y: string) => "#" + new THREE.Color(x).lerp(new THREE.Color(y), t).getHexString();
-        return { bg: mix(A.bg, B.bg), fg: mix(A.fg, B.fg), muted: mix(A.muted, B.muted), ink: mix(A.ink, B.ink) };
+        return { bg: mix(A.bg, B.bg), fg: mix(A.fg, B.fg), muted: mix(A.muted, B.muted), ink: mix(A.ink, B.ink), route: mix(A.route, B.route) };
       };
 
       const panels = Array.from(wrap.querySelectorAll<HTMLElement>("[data-panel]"));
@@ -199,14 +205,15 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         side = reduced ? want : side + (want - side) * (1 - Math.exp(-dt * 4));
         scrims.forEach((sc) => (sc.style.opacity = String(sc.dataset.scrim === bestSide ? best : 0)));
         if (adminEl) {
-          adminEl.style.opacity = String(ramp(q, 0.805, 0.835) * (1 - ramp(q, 0.875, 0.89)));
+          adminEl.style.opacity = String(ramp(q, 0.805, 0.835) * (1 - ramp(q, 0.948, 0.96)));
+          adminEl.dataset.tab = q > 0.856 ? "analytics" : "floor";
         }
         if (dashEl && dashInner) {
-          const d = ramp(q, 0.868, 0.89);
+          const d = ramp(q, 0.95, 0.964);
           show(dashEl, d, 40);
           dashEl.style.pointerEvents = d > 0.9 ? "auto" : "none";
           const room = Math.max(0, dashInner.offsetHeight - dashEl.clientHeight);
-          dashInner.style.transform = `translateY(${-room * smooth(ramp(q, 0.9, 0.985))}px)`;
+          dashInner.style.transform = `translateY(${-room * smooth(ramp(q, 0.968, 0.996))}px)`;
         }
 
         // page colours
@@ -216,14 +223,19 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         wrap.style.setProperty("--c-muted", th.muted);
 
         // the model
+        const morph = ramp(q, 0.905, 0.945);
         floor.set({
-          rise: ramp(q, 0.05, 0.215),
+          // the room builds up, and sinks back into the code while its numbers become the chart
+          rise: ramp(q, 0.05, 0.215) * (1 - ramp(q, 0.9, 0.94)),
           line: q < 0.79 ? ramp(q, 0.54, 0.575) : 1 - 0.22 * ramp(q, 0.79, 0.83),
           ink: th.ink,
           paper: th.bg,
           admin: ramp(q, 0.805, 0.845),
           book: smooth(ramp(q, 0.318, 0.352)),
           dish: ramp(q, 0.458, 0.5),
+          bars: ramp(q, 0.858, 0.9),
+          morph,
+          route: th.route,
           order: ramp(q, 0.582, 0.625) * (1 - ramp(q, 0.79, 0.81)),
           bill: ramp(q, 0.737, 0.775) * (1 - ramp(q, 0.79, 0.81)),
         });
@@ -315,7 +327,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
   );
 
   return (
-    <div ref={root} className="relative" style={{ height: "1400svh", background: "var(--c-bg)", color: "var(--c-fg)", ["--c-bg" as string]: PAPER.bg, ["--c-fg" as string]: PAPER.fg, ["--c-muted" as string]: PAPER.muted }}>
+    <div ref={root} className="relative" style={{ height: "1500svh", background: "var(--c-bg)", color: "var(--c-fg)", ["--c-bg" as string]: PAPER.bg, ["--c-fg" as string]: PAPER.fg, ["--c-muted" as string]: PAPER.muted }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={host} className="absolute inset-0" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] sm:hidden" style={{ background: "linear-gradient(transparent, var(--c-bg) 42%)" }} />
@@ -359,8 +371,8 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
           </div>
         ))}
 
-        {/* dashboard frame round the floor (sample data) */}
-        <div data-admin className="pointer-events-none absolute inset-x-3 top-20 bottom-[36svh] opacity-0 sm:inset-x-auto sm:top-[8svh] sm:right-[3vw] sm:bottom-[8svh] sm:w-[min(58vw,62rem)]">
+        {/* dashboard frame round the floor (sample data, same numbers as the dashboard below) */}
+        <div data-admin data-tab="floor" className="group pointer-events-none absolute inset-x-3 top-20 bottom-[36svh] opacity-0 sm:inset-x-auto sm:top-[8svh] sm:right-[3vw] sm:bottom-[8svh] sm:w-[min(58vw,62rem)]">
           <div className="flex h-full flex-col overflow-hidden rounded-2xl ring-1 ring-black/10" style={{ boxShadow: "0 30px 90px -40px rgba(13,12,11,.35)" }}>
             <div className="flex items-center gap-3 border-b border-black/10 bg-[#fbfaf7]/90 px-4 py-2.5 text-xs text-[#5f5e5c] backdrop-blur">
               <span className="flex gap-1.5">
@@ -369,12 +381,29 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
               <span className="font-medium text-[#0d0c0b]">{BRAND} · Dashboard</span>
               <span className="ml-auto flex gap-1">
                 {["Floor", "Orders", "Menu", "Analytics"].map((t) => (
-                  <span key={t} className={`rounded-full px-2.5 py-1 max-sm:[&:nth-child(2)]:hidden max-sm:[&:nth-child(3)]:hidden ${t === "Floor" ? "bg-[#0d0c0b] text-white" : ""}`}>{t}</span>
+                  <span
+                    key={t}
+                    className={`rounded-full px-2.5 py-1 transition-colors max-sm:[&:nth-child(2)]:hidden max-sm:[&:nth-child(3)]:hidden ${t === "Floor" ? "group-data-[tab=floor]:bg-[#0d0c0b] group-data-[tab=floor]:text-white" : t === "Analytics" ? "group-data-[tab=analytics]:bg-[#0d0c0b] group-data-[tab=analytics]:text-white" : ""}`}
+                  >
+                    {t}
+                  </span>
                 ))}
               </span>
             </div>
+            <div className="grid grid-cols-3 gap-px border-b border-black/10 bg-black/10 text-[#0d0c0b]">
+              {[
+                ["Seated", "14 / 22", "Sales today", "€2,846"],
+                ["Waiting > 10 min", "3 tables", "Orders today", "132"],
+                ["Open bills", "6", "Busiest hour", "20:00"],
+              ].map(([a, av, b, bv]) => (
+                <div key={a} className="bg-[#fbfaf7]/90 px-4 py-2.5 backdrop-blur">
+                  <p className="text-[11px] text-[#5f5e5c]"><span className="group-data-[tab=analytics]:hidden">{a}</span><span className="hidden group-data-[tab=analytics]:inline">{b}</span></p>
+                  <p className="text-sm font-medium sm:text-base"><span className="group-data-[tab=analytics]:hidden">{av}</span><span className="hidden group-data-[tab=analytics]:inline">{bv}</span></p>
+                </div>
+              ))}
+            </div>
             <div className="flex-1" />
-            <p className="bg-[#fbfaf7]/90 px-4 py-2 text-[10px] text-[#8a8884] backdrop-blur">Sample data · tables by status</p>
+            <p className="bg-[#fbfaf7]/90 px-4 py-2 text-[10px] text-[#8a8884] backdrop-blur">Sample data · <span className="group-data-[tab=analytics]:hidden">tables by status</span><span className="hidden group-data-[tab=analytics]:inline">orders by table, then by hour</span></p>
           </div>
         </div>
 

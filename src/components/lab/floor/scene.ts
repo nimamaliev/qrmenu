@@ -8,10 +8,12 @@
  * floor in turn. The same meshes draw as soft clay or as a line drawing on paper (faces painted
  * in the page colour hide the edges behind them, like LightGearLab's "lines" view), and table
  * tops can take status colours for the dashboard. One table holds a menu book that opens on a
- * dish with its own QR code, and a plate where the real 3D dish appears.
+ * dish with its own QR code, and a plate where the real 3D dish appears. For analytics, bars
+ * grow out of the tables, then fly together as bricks into the "busiest hours" chart.
  */
 import type * as T from "three";
 import QRCode from "qrcode";
+import { ORDERS_PER_HOUR } from "@/components/home/OwnerDashboard";
 
 export type FloorState = {
   rise: number; // 0 flat code .. 1 restaurant built
@@ -21,6 +23,9 @@ export type FloorState = {
   admin: number; // table tops take status colours
   book: number; // 0 closed .. 1 open
   dish: number; // 0 hidden .. 1 the 3D dish fully revealed on its plate
+  bars: number; // analytics bars grow out of the tables
+  morph: number; // 0 bars on tables .. 1 bricks stacked into the hourly chart
+  route: string; // colour of the order/bill lines (must stand out on the page colour)
   order: number; // table -> kitchen route drawn
   bill: number; // table -> till route drawn
 };
@@ -29,7 +34,7 @@ export type Floor = {
   root: T.Group;
   /** Floor size in world units (code + quiet zone). */
   size: number;
-  spots: { hero: T.Vector3; book: T.Vector3; page: T.Vector3; dish: T.Vector3; kitchen: T.Vector3; bar: T.Vector3; till: T.Vector3 };
+  spots: { hero: T.Vector3; book: T.Vector3; page: T.Vector3; dish: T.Vector3; kitchen: T.Vector3; bar: T.Vector3; till: T.Vector3; chart: T.Vector3 };
   /** Put the real dish (a loaded glTF scene, in metres) on the hero table's plate. */
   addDish: (dish: T.Object3D) => void;
   set: (s: FloorState) => void;
@@ -248,7 +253,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     }
     // a little QR card on every table
     const cy = rand() * Math.PI;
-    if (t !== pick) for (const sgn of [-1, 1]) add(box(0.2, 0.15, 0.012), { color: COLORS.card, delay: t.delay + 0.04, at: [t.x + Math.sin(cy) * sgn * 0.035, TOP, t.z + Math.cos(cy) * sgn * 0.035], yaw: cy, tilt: sgn * 0.26 });
+    if (t !== pick) for (const sgn of [-1, 1]) add(box(0.2, 0.15, 0.012), { color: COLORS.card, delay: t.delay + 0.04, at: [t.x + Math.sin(cy) * sgn * 0.035, TOP, t.z + Math.cos(cy) * sgn * 0.035], yaw: cy, tilt: -sgn * 0.26 });
     // chairs on the free squares beside it, facing the table
     const max = t.round ? 2 : 3;
     const spots: [number, number, number, number][] = [];
@@ -275,6 +280,49 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     }
   });
 
+  // ---- analytics: one bar per table; each later flies to a slot in the hourly chart as a brick
+  const HMAX = 14;
+  const GAP = 1.9;
+  const peak = ORDERS_PER_HOUR.indexOf(Math.max(...ORDERS_PER_HOUR));
+  const total = ORDERS_PER_HOUR.reduce((a, b) => a + b, 0);
+  // bricks per hour column, in proportion to that hour's orders (largest remainder)
+  const raw = ORDERS_PER_HOUR.map((v) => (v / total) * tables.length);
+  const counts = raw.map(Math.floor);
+  raw.map((v, i) => [v - Math.floor(v), i] as const).sort((a, b) => b[0] - a[0]).slice(0, tables.length - counts.reduce((a, b) => a + b, 0)).forEach(([, i]) => counts[i]++);
+  const slots: { to: [number, number, number]; h: number; col: string; k: number }[] = [];
+  counts.forEach((cnt, j) => {
+    const colH = (ORDERS_PER_HOUR[j] / ORDERS_PER_HOUR[peak]) * HMAX;
+    for (let k = 0; k < cnt; k++) slots.push({ to: [(j - (ORDERS_PER_HOUR.length - 1) / 2) * GAP, (k * colH) / cnt, 0], h: colH / cnt - 0.07, col: j === peak ? COLORS.tomato : "#e2a294", k: j / ORDERS_PER_HOUR.length });
+  });
+  const barGeos: T.BufferGeometry[] = [];
+  const barEdgeGeos: T.BufferGeometry[] = [];
+  const unit = box(1, 1, 1);
+  const unitEdges = new THREE.EdgesGeometry(unit);
+  const vec = (g: T.BufferGeometry, name: string, v: number[]) => {
+    const a = new Float32Array(g.attributes.position.count * v.length);
+    for (let i = 0; i < a.length; i += v.length) a.set(v, i);
+    g.setAttribute(name, new THREE.Float32BufferAttribute(a, v.length));
+  };
+  [...tables].sort((a, b) => a.x - b.x || a.z - b.z).forEach((t, i) => {
+    const v = Math.pow(rand(), 1.6);
+    const slot = slots[i];
+    col.set(v > 0.5 ? COLORS.tomato : v > 0.22 ? "#e7b24c" : "#c9bfb0");
+    const from = [col.r, col.g, col.b];
+    col.set(slot.col);
+    const per = (g: T.BufferGeometry, fill: boolean) => {
+      vec(g, "aFrom", [t.x, TOP, t.z]);
+      vec(g, "aTo", slot.to);
+      vec(g, "aDims", [0.6 + v * 4.2, slot.h, 0.6 * (1 - v), Math.min(1, slot.k + rand() * 0.15)]); // height on table, brick height, rise delay, fly stagger
+      if (fill) {
+        vec(g, "color", from);
+        vec(g, "aColTo", [col.r, col.g, col.b]);
+      }
+      return g;
+    };
+    barGeos.push(per(unit.toNonIndexed(), true));
+    barEdgeGeos.push(per(unitEdges.clone(), false));
+  });
+
   // tiles for every dark square, each fading as the thing standing on it rises
   for (let y = 0; y < n; y++)
     for (let x = 0; x < n; x++) {
@@ -290,6 +338,8 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   // ---- materials
   const U = {
     uRise: { value: 0 },
+    uBars: { value: 0 },
+    uMorph: { value: 0 },
     uLine: { value: 0 },
     uAdmin: { value: 0 },
     uPaper: { value: new THREE.Color(COLORS.floor) },
@@ -327,6 +377,32 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const lineMat = grow(new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true, opacity: 0 }), "uRise");
   const hullMat = grow(new THREE.MeshBasicMaterial({ color: "#0d0c0b", side: THREE.BackSide, transparent: true, opacity: 0 }), "uRise", { push: true });
   const depth = () => grow(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), "uRise");
+  // bars: grow on their table, then fly in an arc to their brick slot, changing colour
+  const flyVertex = (fill: boolean) => `
+    float rr = clamp((uBars - aDims.z) / 0.35, 0.0, 1.0);
+    float uu = rr - 1.0;
+    float kk = rr <= 0.0 ? 0.0 : 1.0 + 2.70158 * uu * uu * uu + 1.70158 * uu * uu;
+    float mm = smoothstep(0.0, 1.0, clamp((uMorph - aDims.w * 0.55) / 0.45, 0.0, 1.0));
+    float w = mix(0.56, 1.3, mm);
+    float h = max(mix(aDims.x * kk, aDims.y, mm), 0.0001);
+    vec3 base = mix(aFrom, aTo, mm) + vec3(0.0, sin(mm * 3.14159) * 4.0, 0.0);
+    vec3 transformed = vec3(position.x * w, position.y * h, position.z * w) + base;
+    if (rr <= 0.0) transformed.y -= 1.0;
+    ${fill ? "vColor.rgb = mix(color.rgb, aColTo, mm);" : ""}`;
+  const fly = <M extends T.Material>(m: M, fill: boolean): M => {
+    m.onBeforeCompile = (sh) => {
+      sh.uniforms.uBars = U.uBars;
+      sh.uniforms.uMorph = U.uMorph;
+      sh.vertexShader =
+        `attribute vec3 aFrom;\nattribute vec3 aTo;\nattribute vec4 aDims;\nuniform float uBars;\nuniform float uMorph;\n${fill ? "attribute vec3 aColTo;\n" : ""}` +
+        sh.vertexShader.replace("#include <begin_vertex>", flyVertex(fill));
+    };
+    return m;
+  };
+  const bars = new THREE.Mesh(merge(barGeos), fly(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }), true));
+  const barLineMat = fly(new THREE.LineBasicMaterial({ color: "#0d0c0b" }), false);
+  const barLines = new THREE.LineSegments(merge(barEdgeGeos), barLineMat);
+  bars.frustumCulled = barLines.frustumCulled = false; // they fly far from where their geometry starts
 
   const root = new THREE.Group();
   const fill = new THREE.Mesh(merge(fills), fillMat);
@@ -346,16 +422,17 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   });
   const tiles = new THREE.Mesh(merge(tileGeos), tileMat);
   tiles.receiveShadow = false;
-  root.add(fill, tiles, lines, hull);
+  root.add(fill, tiles, lines, hull, bars, barLines);
 
   // routes: arcs from the hero table to the kitchen and to the till, with a ticket at the head
+  const routeMat = new THREE.MeshBasicMaterial({ color: COLORS.tomato });
   const route = (to: T.Vector3) => {
     const a = hero.clone().add(new THREE.Vector3(0, 0.1, 0));
     const b = to.clone();
     const mid = a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, 4 + a.distanceTo(b) * 0.15, 0));
     const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
     const geo = new THREE.TubeGeometry(curve, 90, 0.07, 8, false);
-    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: COLORS.tomato }));
+    const mesh = new THREE.Mesh(geo, routeMat);
     const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), mesh.material);
     root.add(mesh, head);
     return (k: number) => {
@@ -368,7 +445,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const bar = new THREE.Vector3(W(n - 4), 1.0, W(3));
   const till = new THREE.Vector3(W(3), 1.0, W(n - 4));
   const orderRoute = route(kitchen);
-  const billRoute = route(till);
+  const billRoute = route(till.clone().add(new THREE.Vector3(-0.55, -0.02, 0.75)));
 
   // ---- the hero table's menu book: closed on the table, it opens on a dish with its own QR code
   const horiz = pick.cells.length > 1 && pick.cells[0][1] === pick.cells[1][1];
@@ -403,7 +480,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     g.fillText("Menu", 256, 96);
     g.fillStyle = "#b83219";
     g.fillRect(226, 120, 60, 3);
-    const items = [["Burrata", "9"], ["Margherita", "11"], ["Caesar salad", "9"], ["Tagliatelle", "13"], ["Tiramisu", "6"]];
+    const items = [["Burrata", "€9"], ["Margherita", "€11"], ["Caesar salad", "€9"], ["Tagliatelle", "€13"], ["Tiramisu", "€6"]];
     g.textAlign = "left";
     items.forEach(([name, price], i) => {
       const y = 200 + i * 92;
@@ -427,7 +504,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     g.fillText("Cheeseburger", 256, 152);
     g.font = "22px system-ui, sans-serif";
     g.fillStyle = "#5f5e5c";
-    g.fillText("Brioche, aged cheddar, pickles · 14", 256, 196);
+    g.fillText("Brioche, aged cheddar, pickles · €14", 256, 196);
     qrAt(g, 136, 236, 240);
     g.fillStyle = "#b83219";
     g.beginPath();
@@ -460,14 +537,15 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const coverMat = new THREE.MeshStandardMaterial({ color: "#7c2414", roughness: 0.7 });
   const BW = 0.21, BH = 0.29, BT = 0.012;
   const book = new THREE.Group();
-  const left = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [paperEdge, coverMat, leftPage, coverMat, paperEdge, paperEdge]);
-  left.position.set(-BW / 2, BT / 2, 0);
+  // the dish page stays put; the left half (menu list on top, front cover underneath) swings open
+  const right = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [paperEdge, coverMat, rightPage, coverMat, paperEdge, paperEdge]);
+  right.position.set(BW / 2, BT / 2, 0);
   const hinge = new THREE.Group();
   hinge.position.y = BT;
-  const right = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [coverMat, paperEdge, rightPage, coverArt, paperEdge, paperEdge]);
-  right.position.set(BW / 2, -BT / 2, 0);
-  hinge.add(right);
-  book.add(left, hinge);
+  const left = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [coverMat, paperEdge, leftPage, coverArt, paperEdge, paperEdge]);
+  left.position.set(-BW / 2, -BT / 2, 0);
+  hinge.add(left);
+  book.add(right, hinge);
   book.traverse((o) => (o.castShadow = o.receiveShadow = true));
   book.position.copy(bookAt);
   book.rotation.y = facing;
@@ -490,7 +568,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   return {
     root,
     size,
-    spots: { hero, book: bookAt.clone().setY(TOP + BT), page: pageAt, dish: dishBase, kitchen, bar, till },
+    spots: { hero, book: bookAt.clone().setY(TOP + BT), page: pageAt, dish: dishBase, kitchen, bar, till, chart: new THREE.Vector3(0, HMAX / 2, 0) },
     addDish: (d) => {
       d.position.copy(dishBase);
       d.traverse((o) => {
@@ -516,13 +594,18 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
       book.visible = plate.visible = s.rise > 0.55;
       book.scale.setScalar(here);
       plate.scale.setScalar(here);
-      hinge.rotation.z = Math.PI * (1 - s.book);
+      hinge.rotation.z = -Math.PI * (1 - s.book);
       const h = DISH_H * s.dish;
       clip.constant = dishBase.y - 0.001 + h;
-      if (dishObj) dishObj.visible = s.dish > 0.001;
+      if (dishObj) dishObj.visible = s.dish > 0.001 && s.rise > 0.55;
       ring.visible = s.dish > 0.001 && s.dish < 0.999;
       ring.position.copy(dishBase).setY(dishBase.y + h);
       ring.scale.setScalar(1 + 0.12 * Math.sin(Math.PI * s.dish));
+      U.uBars.value = s.bars;
+      U.uMorph.value = s.morph;
+      bars.visible = barLines.visible = s.bars > 0.001;
+      barLineMat.color.set(s.ink);
+      routeMat.color.set(s.route);
       orderRoute(s.order);
       billRoute(s.bill);
     },

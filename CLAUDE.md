@@ -152,7 +152,9 @@ chairs on free squares) -> a menu book on one table opens on a dish with its own
 the real burger (`public/models/burger.glb`, metres = life-size) is revealed on the plate by a
 rising scan ring (clipping plane) and the camera circles it, "Try it yourself" -> line-drawing
 chapters on saffron/tomato/basil (order, kitchen, bill) -> floor inside a dashboard frame with
-status colours -> the real `OwnerDashboard` (the user's favourite) scrolled through as the finale. One merged-geometry scene, one shader `rise`; clay and line looks
+status colours -> analytics bars grow out of the tables, the room sinks back into the code and the
+bars fly together as bricks into the hourly chart (same `ORDERS_PER_HOUR` as the dashboard) -> the
+real `OwnerDashboard` (the user's favourite) scrolled through as the finale. One merged-geometry scene, one shader `rise`; clay and line looks
 share meshes (paper-coloured faces + 20° edges + inverted-hull outlines, LightGearLab's method).
 Draft copy, sample data: confirm the dashboard features before any of it goes on the homepage.
 

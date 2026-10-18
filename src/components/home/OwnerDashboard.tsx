@@ -42,8 +42,8 @@ const TOP_DISHES: [MenuKey, number][] = [
   ["funghi", 235],
 ];
 
-const HOURS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
-const ORDERS_PER_HOUR = [6, 14, 22, 18, 9, 7, 10, 19, 31, 36, 28, 17, 8];
+export const HOURS = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+export const ORDERS_PER_HOUR = [6, 14, 22, 18, 9, 7, 10, 19, 31, 36, 28, 17, 8];
 
 const STATUS_STYLE: Record<Status, { dot: string; ring: string; text: string }> = {
   free: { dot: "bg-neutral-500", ring: "border-line", text: "text-muted" },
