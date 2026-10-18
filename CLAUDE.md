@@ -148,9 +148,11 @@ In progress (2026-10-18): the user liked the concepts' idea but found them slopp
 "sketch" look). New direction, after LightGearLab's frames: **floor story** preview at
 `/[lang]/lab/floor` (`components/lab/floor/`): a real QR code rises into a mini restaurant
 (finder squares = kitchen/bar/till rooms, timing rows = planters, other dark squares = tables,
-chairs on free squares) -> camera dives into a table's menu card -> digital menu -> line-drawing
+chairs on free squares) -> a menu book on one table opens on a dish with its own (real) QR code ->
+the real burger (`public/models/burger.glb`, metres = life-size) is revealed on the plate by a
+rising scan ring (clipping plane) and the camera circles it, "Try it yourself" -> line-drawing
 chapters on saffron/tomato/basil (order, kitchen, bill) -> floor inside a dashboard frame with
-status colours -> analytics bars. One merged-geometry scene, one shader `rise`; clay and line looks
+status colours -> the real `OwnerDashboard` (the user's favourite) scrolled through as the finale. One merged-geometry scene, one shader `rise`; clay and line looks
 share meshes (paper-coloured faces + 20° edges + inverted-hull outlines, LightGearLab's method).
 Draft copy, sample data: confirm the dashboard features before any of it goes on the homepage.
 

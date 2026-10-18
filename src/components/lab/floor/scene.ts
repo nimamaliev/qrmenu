@@ -7,7 +7,8 @@
  * Everything is merged into a few meshes; one shader uniform (`rise`) grows each piece from the
  * floor in turn. The same meshes draw as soft clay or as a line drawing on paper (faces painted
  * in the page colour hide the edges behind them, like LightGearLab's "lines" view), and table
- * tops can take status colours for the dashboard. Analytics bars grow out of the tables.
+ * tops can take status colours for the dashboard. One table holds a menu book that opens on a
+ * dish with its own QR code, and a plate where the real 3D dish appears.
  */
 import type * as T from "three";
 import QRCode from "qrcode";
@@ -18,7 +19,8 @@ export type FloorState = {
   ink: string;
   paper: string;
   admin: number; // table tops take status colours
-  bars: number; // analytics bars grow
+  book: number; // 0 closed .. 1 open
+  dish: number; // 0 hidden .. 1 the 3D dish fully revealed on its plate
   order: number; // table -> kitchen route drawn
   bill: number; // table -> till route drawn
 };
@@ -27,9 +29,9 @@ export type Floor = {
   root: T.Group;
   /** Floor size in world units (code + quiet zone). */
   size: number;
-  spots: { hero: T.Vector3; card: T.Vector3; kitchen: T.Vector3; bar: T.Vector3; till: T.Vector3 };
-  /** Turn the hero table's menu card to face this azimuth (radians, 0 = +z). */
-  faceCard: (theta: number) => void;
+  spots: { hero: T.Vector3; book: T.Vector3; page: T.Vector3; dish: T.Vector3; kitchen: T.Vector3; bar: T.Vector3; till: T.Vector3 };
+  /** Put the real dish (a loaded glTF scene, in metres) on the hero table's plate. */
+  addDish: (dish: T.Object3D) => void;
   set: (s: FloorState) => void;
 };
 
@@ -58,7 +60,8 @@ const finderAt = (n: number) => [
   [0, n - 7],
 ];
 
-export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.BufferGeometry, url: string): Floor {
+/** `facing`: azimuth (radians, 0 = +z) the menu book is read from, i.e. where the camera looks from. */
+export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.BufferGeometry, url: string, facing: number): Floor {
   const qr = QRCode.create(url, { errorCorrectionLevel: "L" });
   const n = qr.modules.size;
   const c = (n - 1) / 2;
@@ -75,14 +78,12 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const fills: T.BufferGeometry[] = [];
   const edges: T.BufferGeometry[] = [];
   const hulls: T.BufferGeometry[] = [];
-  const barFills: T.BufferGeometry[] = [];
-  const barEdges: T.BufferGeometry[] = [];
   const m4 = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const col = new THREE.Color();
   const one = new THREE.Vector3(1, 1, 1);
 
-  type Opt = { color: string; delay: number; at: [number, number, number]; yaw?: number; tilt?: number; status?: number; edge?: number | false; hull?: boolean; base?: number; bar?: boolean };
+  type Opt = { color: string; delay: number; at: [number, number, number]; yaw?: number; tilt?: number; status?: number; edge?: number | false; hull?: boolean };
   const attr = (g: T.BufferGeometry, name: string, v: number) => g.setAttribute(name, new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(v), 1));
   const add = (src: T.BufferGeometry, o: Opt) => {
     q.setFromEuler(new THREE.Euler(o.tilt ?? 0, o.yaw ?? 0, 0, "YXZ"));
@@ -95,13 +96,13 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     g.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));
     attr(g, "aDelay", o.delay);
     attr(g, "aStatus", o.status ?? 0);
-    attr(g, "aBase", o.base ?? 0);
-    (o.bar ? barFills : fills).push(g);
+    attr(g, "aBase", 0);
+    fills.push(g);
     if (o.edge !== false) {
       const e = new THREE.EdgesGeometry(src, o.edge ?? 20).applyMatrix4(m4);
       attr(e, "aDelay", o.delay);
-      attr(e, "aBase", o.base ?? 0);
-      (o.bar ? barEdges : edges).push(e);
+      attr(e, "aBase", 0);
+      edges.push(e);
     }
     if (o.hull) {
       const h = g.clone();
@@ -228,7 +229,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     }
 
   const TOP = 0.76;
-  // the hero table (front right of centre) gets its own readable menu card instead of a small one
+  // the hero table (front right of centre) gets the menu book and the 3D dish instead of a small card
   const pick = tables.filter((t) => !t.round).sort((a, b) => Math.hypot(a.x - c * 0.3, a.z - c * 0.35) - Math.hypot(b.x - c * 0.3, b.z - c * 0.35))[0] ?? tables[0];
   const hero = new THREE.Vector3(pick.x, TOP, pick.z);
   tables.forEach((t) => {
@@ -270,11 +271,8 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
       add(box(0.44, 0.06, 0.44), { color: COLORS.chair, delay: d, at: [px, 0.4, pz], yaw });
       add(box(0.44, 0.44, 0.06), { color: COLORS.chair, delay: d, at: [px + ddx * 0.19, 0.46, pz + ddy * 0.19], yaw });
       // a plate in front of some guests
-      if (rand() < 0.55) add(cyl(0.14, 0.12, 0.025, 20), { color: COLORS.card, delay: d + 0.03, at: [W(ax) - ddx * 0.78, TOP, W(by) - ddy * 0.78], hull: true, edge: 40 });
+      if (rand() < 0.55 && t !== pick) add(cyl(0.14, 0.12, 0.025, 20), { color: COLORS.card, delay: d + 0.03, at: [W(ax) - ddx * 0.78, TOP, W(by) - ddy * 0.78], hull: true, edge: 40 });
     }
-    // analytics: a bar out of every table, taller where it sold more
-    const v = Math.pow(rand(), 1.6);
-    add(box(0.56, 0.6 + v * 4.2, 0.56), { color: v > 0.5 ? COLORS.tomato : v > 0.22 ? "#e7b24c" : "#c9bfb0", delay: 0.6 * (1 - v), at: [t.x, TOP, t.z], base: TOP, bar: true });
   });
 
   // tiles for every dark square, each fading as the thing standing on it rises
@@ -292,7 +290,6 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   // ---- materials
   const U = {
     uRise: { value: 0 },
-    uBars: { value: 0 },
     uLine: { value: 0 },
     uAdmin: { value: 0 },
     uPaper: { value: new THREE.Color(COLORS.floor) },
@@ -307,11 +304,11 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     float kk = rr <= 0.0 ? 0.0 : 1.0 + 2.70158 * uu * uu * uu + 1.70158 * uu * uu;
     ${push ? "transformed += normalize(normal) * 0.022;" : ""}
     transformed.y = (transformed.y - aBase) * kk + aBase - (rr <= 0.0 ? 0.1 : 0.0);`;
-  const grow = <M extends T.Material>(m: M, riseName: "uRise" | "uBars", opts: { push?: boolean; fill?: boolean } = {}): M => {
+  const grow = <M extends T.Material>(m: M, riseName: "uRise", opts: { push?: boolean; fill?: boolean } = {}): M => {
     m.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, U);
       sh.vertexShader =
-        `attribute float aDelay;\nattribute float aBase;\nuniform float uRise;\nuniform float uBars;\n${opts.fill ? "attribute float aStatus;\nvarying float vStatus;\n" : ""}` +
+        `attribute float aDelay;\nattribute float aBase;\nuniform float uRise;\n${opts.fill ? "attribute float aStatus;\nvarying float vStatus;\n" : ""}` +
         sh.vertexShader.replace("#include <begin_vertex>", growVertex(riseName, !!opts.push) + (opts.fill ? "\nvStatus = aStatus;" : ""));
       if (opts.fill)
         sh.fragmentShader =
@@ -319,7 +316,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
           sh.fragmentShader.replace(
             "#include <opaque_fragment>",
             `#include <opaque_fragment>
-            gl_FragColor.rgb = mix(gl_FragColor.rgb, uPaper, ${riseName === "uBars" ? "0.0" : "uLine"});
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, uPaper, uLine);
             int si = int(vStatus + 0.5);
             if (si > 0) gl_FragColor.rgb = mix(gl_FragColor.rgb, uStat[si], uAdmin);`,
           );
@@ -329,21 +326,15 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const fillMat = grow(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.86, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }), "uRise", { fill: true });
   const lineMat = grow(new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true, opacity: 0 }), "uRise");
   const hullMat = grow(new THREE.MeshBasicMaterial({ color: "#0d0c0b", side: THREE.BackSide, transparent: true, opacity: 0 }), "uRise", { push: true });
-  const barMat = grow(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }), "uBars", { fill: true });
-  const barLineMat = grow(new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true, opacity: 1 }), "uBars");
-  const depth = (riseName: "uRise" | "uBars") => grow(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), riseName);
+  const depth = () => grow(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), "uRise");
 
   const root = new THREE.Group();
   const fill = new THREE.Mesh(merge(fills), fillMat);
   fill.castShadow = fill.receiveShadow = true;
-  fill.customDepthMaterial = depth("uRise");
+  fill.customDepthMaterial = depth();
   const lines = new THREE.LineSegments(merge(edges), lineMat);
   hulls.forEach((h) => attr(h, "aBase", 0));
   const hull = new THREE.Mesh(merge(hulls), hullMat);
-  const bars = new THREE.Mesh(merge(barFills), barMat);
-  bars.castShadow = true;
-  bars.customDepthMaterial = depth("uBars");
-  const barLines = new THREE.LineSegments(merge(barEdges), barLineMat);
   const tileMat = new THREE.ShaderMaterial({
     uniforms: U,
     vertexShader: `attribute float aDelay; uniform float uRise; varying float vK;
@@ -355,7 +346,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   });
   const tiles = new THREE.Mesh(merge(tileGeos), tileMat);
   tiles.receiveShadow = false;
-  root.add(fill, tiles, lines, hull, bars, barLines);
+  root.add(fill, tiles, lines, hull);
 
   // routes: arcs from the hero table to the kitchen and to the till, with a ticket at the head
   const route = (to: T.Vector3) => {
@@ -379,60 +370,159 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const orderRoute = route(kitchen);
   const billRoute = route(till);
 
-  // the hero table's menu card: a standing card with the real code printed on it
-  const cv = document.createElement("canvas");
-  cv.width = 256;
-  cv.height = 340;
-  const g2 = cv.getContext("2d")!;
-  g2.fillStyle = COLORS.card;
-  g2.fillRect(0, 0, 256, 340);
-  const cell = 200 / n;
-  g2.fillStyle = "#0d0c0b";
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (dark(x, y)) g2.fillRect(28 + x * cell, 30 + y * cell, Math.ceil(cell), Math.ceil(cell));
-  g2.font = "600 22px system-ui, sans-serif";
-  g2.textAlign = "center";
-  g2.fillText("Scan for the menu", 128, 270);
-  g2.fillStyle = COLORS.tomato;
-  g2.font = "500 18px system-ui, sans-serif";
-  g2.fillText("Table 12", 128, 302);
-  const tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  const card = new THREE.Group();
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.4), new THREE.MeshBasicMaterial({ map: tex }));
-  const back = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.012), new THREE.MeshStandardMaterial({ color: COLORS.card }));
-  face.position.z = 0.007;
-  const tilted = new THREE.Group();
-  tilted.add(back, face);
-  tilted.position.y = 0.2;
-  tilted.rotation.x = -0.12;
-  card.add(tilted);
-  const cardEdges = new THREE.LineSegments(new THREE.EdgesGeometry(back.geometry), new THREE.LineBasicMaterial({ color: "#0d0c0b", transparent: true, opacity: 0 }));
-  tilted.add(cardEdges);
-  card.position.copy(hero);
-  root.add(card);
-  const cardAt = hero.clone().add(new THREE.Vector3(0, 0.2, 0));
+  // ---- the hero table's menu book: closed on the table, it opens on a dish with its own QR code
+  const horiz = pick.cells.length > 1 && pick.cells[0][1] === pick.cells[1][1];
+  const along = horiz ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+  const bookAt = hero.clone().addScaledVector(along, -0.4);
+  const dishAt = hero.clone().addScaledVector(along, 0.4);
+  const page = (draw: (g: CanvasRenderingContext2D) => void) => {
+    const cv = document.createElement("canvas");
+    cv.width = 512;
+    cv.height = 708;
+    const g = cv.getContext("2d")!;
+    g.fillStyle = "#f8f4ec";
+    g.fillRect(0, 0, 512, 708);
+    g.textAlign = "center";
+    draw(g);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 });
+  };
+  const serif = "Georgia, 'Times New Roman', serif";
+  const qrAt = (g: CanvasRenderingContext2D, x: number, y: number, w: number) => {
+    const s2 = w / (n + 2);
+    g.fillStyle = "#ffffff";
+    g.fillRect(x, y, w, w);
+    g.fillStyle = "#0d0c0b";
+    for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < n; xx++) if (dark(xx, yy)) g.fillRect(x + (xx + 1) * s2, y + (yy + 1) * s2, Math.ceil(s2), Math.ceil(s2));
+  };
+  const leftPage = page((g) => {
+    g.fillStyle = "#0d0c0b";
+    g.font = `italic 44px ${serif}`;
+    g.fillText("Menu", 256, 96);
+    g.fillStyle = "#b83219";
+    g.fillRect(226, 120, 60, 3);
+    const items = [["Burrata", "9"], ["Margherita", "11"], ["Caesar salad", "9"], ["Tagliatelle", "13"], ["Tiramisu", "6"]];
+    g.textAlign = "left";
+    items.forEach(([name, price], i) => {
+      const y = 200 + i * 92;
+      g.fillStyle = "#0d0c0b";
+      g.font = `30px ${serif}`;
+      g.fillText(name, 60, y);
+      g.textAlign = "right";
+      g.fillText(price, 452, y);
+      g.textAlign = "left";
+      g.fillStyle = "#8a8884";
+      g.font = "20px system-ui, sans-serif";
+      g.fillText("scan to see it in 3D", 60, y + 30);
+    });
+  });
+  const rightPage = page((g) => {
+    g.fillStyle = "#8a8884";
+    g.font = "22px system-ui, sans-serif";
+    g.fillText("Chef's pick", 256, 84);
+    g.fillStyle = "#0d0c0b";
+    g.font = `italic 56px ${serif}`;
+    g.fillText("Cheeseburger", 256, 152);
+    g.font = "22px system-ui, sans-serif";
+    g.fillStyle = "#5f5e5c";
+    g.fillText("Brioche, aged cheddar, pickles · 14", 256, 196);
+    qrAt(g, 136, 236, 240);
+    g.fillStyle = "#b83219";
+    g.beginPath();
+    g.roundRect(206, 506, 100, 40, 20);
+    g.fill();
+    g.fillStyle = "#ffffff";
+    g.font = "600 22px system-ui, sans-serif";
+    g.fillText("3D", 256, 534);
+    g.fillStyle = "#0d0c0b";
+    g.font = `26px ${serif}`;
+    g.fillText("Scan it and see the dish", 256, 600);
+    g.fillText("on your table", 256, 636);
+  });
+  const coverArt = page((g) => {
+    g.fillStyle = "#7c2414";
+    g.fillRect(0, 0, 512, 708);
+    g.strokeStyle = "#e8c9a8";
+    g.lineWidth = 3;
+    g.strokeRect(28, 28, 456, 652);
+    g.fillStyle = "#f3e2cc";
+    g.font = `italic 64px ${serif}`;
+    g.fillText("Menu", 256, 330);
+    g.font = "22px system-ui, sans-serif";
+    g.fillText("· Trattoria ·", 256, 390);
+  });
+  // the cover art sits on the underside of the right half, so it reads upright once flipped closed
+  (coverArt.map as T.Texture).center.set(0.5, 0.5);
+  (coverArt.map as T.Texture).rotation = Math.PI;
+  const paperEdge = new THREE.MeshStandardMaterial({ color: "#efe8da", roughness: 0.95 });
+  const coverMat = new THREE.MeshStandardMaterial({ color: "#7c2414", roughness: 0.7 });
+  const BW = 0.21, BH = 0.29, BT = 0.012;
+  const book = new THREE.Group();
+  const left = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [paperEdge, coverMat, leftPage, coverMat, paperEdge, paperEdge]);
+  left.position.set(-BW / 2, BT / 2, 0);
+  const hinge = new THREE.Group();
+  hinge.position.y = BT;
+  const right = new THREE.Mesh(new THREE.BoxGeometry(BW, BT, BH), [coverMat, paperEdge, rightPage, coverArt, paperEdge, paperEdge]);
+  right.position.set(BW / 2, -BT / 2, 0);
+  hinge.add(right);
+  book.add(left, hinge);
+  book.traverse((o) => (o.castShadow = o.receiveShadow = true));
+  book.position.copy(bookAt);
+  book.rotation.y = facing;
+  root.add(book);
+  const tmp = new THREE.Vector3();
+  const pageAt = bookAt.clone().add(tmp.set(BW / 2, BT, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), facing));
+
+  // the plate, and the real dish revealed on it by a rising scan line
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.105, 0.014, 40), new THREE.MeshStandardMaterial({ color: "#fbfaf7", roughness: 0.35 }));
+  plate.position.copy(dishAt).add(tmp.set(0, 0.007, 0));
+  plate.castShadow = plate.receiveShadow = true;
+  root.add(plate);
+  const dishBase = dishAt.clone().setY(TOP + 0.014);
+  const clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.0022, 8, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: COLORS.tomato }));
+  root.add(ring);
+  let dishObj: T.Object3D | null = null;
+  const DISH_H = 0.115;
 
   return {
     root,
     size,
-    spots: { hero, card: cardAt, kitchen, bar, till },
-    faceCard: (theta) => (card.rotation.y = theta),
+    spots: { hero, book: bookAt.clone().setY(TOP + BT), page: pageAt, dish: dishBase, kitchen, bar, till },
+    addDish: (d) => {
+      d.position.copy(dishBase);
+      d.traverse((o) => {
+        const m = o as T.Mesh;
+        if (!m.isMesh) return;
+        m.castShadow = true;
+        (Array.isArray(m.material) ? m.material : [m.material]).forEach((mat) => (mat.clippingPlanes = [clip]));
+      });
+      dishObj = d;
+      root.add(d);
+    },
     set: (s) => {
       U.uRise.value = s.rise;
-      U.uBars.value = s.bars;
       U.uLine.value = s.line;
       U.uAdmin.value = s.admin;
       U.uPaper.value.set(s.paper);
-      U.uInk.value.set("#0d0c0b");
       lineMat.color.set(s.ink);
       hullMat.color.set(s.ink);
-      (cardEdges.material as T.LineBasicMaterial).color.set(s.ink);
-      lineMat.opacity = hullMat.opacity = (cardEdges.material as T.LineBasicMaterial).opacity = s.line;
+      lineMat.opacity = hullMat.opacity = s.line;
       lines.visible = hull.visible = s.line > 0.01;
-      bars.visible = barLines.visible = s.bars > 0.001;
-      card.visible = s.rise > 0.5;
-      card.scale.setScalar(Math.min(1, Math.max(0.001, (s.rise - 0.5) * 3)));
+      // the book and plate arrive with the rest of the room
+      const here = Math.min(1, Math.max(0.001, (s.rise - 0.55) * 2.5));
+      book.visible = plate.visible = s.rise > 0.55;
+      book.scale.setScalar(here);
+      plate.scale.setScalar(here);
+      hinge.rotation.z = Math.PI * (1 - s.book);
+      const h = DISH_H * s.dish;
+      clip.constant = dishBase.y - 0.001 + h;
+      if (dishObj) dishObj.visible = s.dish > 0.001;
+      ring.visible = s.dish > 0.001 && s.dish < 0.999;
+      ring.position.copy(dishBase).setY(dishBase.y + h);
+      ring.scale.setScalar(1 + 0.12 * Math.sin(Math.PI * s.dish));
       orderRoute(s.order);
       billRoute(s.bill);
     },
