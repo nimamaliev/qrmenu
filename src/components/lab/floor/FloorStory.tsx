@@ -79,10 +79,15 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
       const small = innerWidth < 768;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(devicePixelRatio, small ? 1.5 : 2));
+      // sharpness adapts: it starts high and steps down if frames keep running slow on this device
+      let dpr = Math.min(devicePixelRatio, small ? 1.5 : 1.75);
+      renderer.setPixelRatio(dpr);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.autoUpdate = false;
+      let lastShadow = "";
+      let dishLoaded = false;
       renderer.localClippingEnabled = true;
       renderer.domElement.setAttribute("aria-hidden", "true");
       renderer.domElement.style.cssText = "display:block;width:100%;height:100%";
@@ -193,21 +198,46 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         floor.setChart(xs, hs, width, base);
       };
       let fitS = 1;
+      // write a style only when it changes: most frames leave most of the page as it was
+      const seen = new WeakMap<HTMLElement, Record<string, string>>();
+      const css = (node: HTMLElement, prop: string, value: string) => {
+        const was = seen.get(node) ?? {};
+        if (was[prop] === value) return;
+        was[prop] = value;
+        seen.set(node, was);
+        node.style.setProperty(prop, value);
+      };
       const show = (node: HTMLElement, o: number, dy: number) => {
-        node.style.opacity = String(o);
-        node.style.transform = `translateY(${(1 - o) * dy}px)`;
-        node.style.visibility = o < 0.01 ? "hidden" : "visible";
+        const r = Math.round(o * 1000) / 1000;
+        css(node, "opacity", String(r));
+        css(node, "transform", `translateY(${((1 - r) * dy).toFixed(1)}px)`);
+        css(node, "visibility", r < 0.01 ? "hidden" : "visible");
       };
 
       let q = target.current;
       let side = 1; // +1 scene on the right (text left), -1 scene on the left
       let raf = 0;
+      let chained = false;
       let last = performance.now();
       let visible = true;
+      let avg = 1 / 60;
+      let streak = 0;
       const frame = (now: number) => {
         raf = 0;
-        const dt = Math.min(0.05, (now - last) / 1000);
+        const real = (now - last) / 1000;
+        const dt = Math.min(0.05, real);
         last = now;
+        if (chained && real < 0.25) {
+          avg += (real - avg) * 0.08;
+          if (++streak > 45 && avg > 0.024 && dpr > 1) {
+            dpr = Math.max(1, dpr - 0.25);
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(el.clientWidth, el.clientHeight, false);
+            streak = 0;
+            avg = 1 / 60;
+          }
+        }
+        chained = true;
         const p = target.current;
         q = reduced ? p : q + (p - q) * (1 - Math.exp(-dt * 7));
         if (Math.abs(p - q) < 1e-5) q = p;
@@ -235,35 +265,36 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         }
         if (q > 0.8) want = 1; // the dashboard sits on the right
         side = reduced ? want : side + (want - side) * (1 - Math.exp(-dt * 4));
-        scrims.forEach((sc) => (sc.style.opacity = String(sc.dataset.scrim === bestSide ? best : 0)));
+        scrims.forEach((sc) => css(sc, "opacity", (sc.dataset.scrim === bestSide ? best : 0).toFixed(3)));
         if (adminEl) {
-          adminEl.style.opacity = String(ramp(q, 0.805, 0.835) * (1 - ramp(q, 0.948, 0.96)));
-          adminEl.dataset.tab = q > 0.856 ? "analytics" : "floor";
+          css(adminEl, "opacity", (ramp(q, 0.805, 0.835) * (1 - ramp(q, 0.948, 0.96))).toFixed(3));
+          const tab = q > 0.856 ? "analytics" : "floor";
+          if (adminEl.dataset.tab !== tab) adminEl.dataset.tab = tab;
         }
         if (dashEl && dashInner) {
           // the dashboard waits, laid out but invisible, with its hourly chart in view: the bricks
           // land on its bars, then it fades in over them and the 3D scene fades away
           const d = ramp(q, 0.946, 0.958);
-          dashEl.style.opacity = String(d);
-          dashEl.style.visibility = d < 0.01 ? "hidden" : "visible";
-          dashEl.style.pointerEvents = d > 0.9 ? "auto" : "none";
+          css(dashEl, "opacity", d.toFixed(3));
+          css(dashEl, "visibility", d < 0.01 ? "hidden" : "visible");
+          css(dashEl, "pointer-events", d > 0.9 ? "auto" : "none");
           // on wide screens it's scaled to fit its frame; on phones it scrolls up from the chart
           fitS = el.clientWidth >= 1024 ? Math.min(1, dashEl.clientHeight / Math.max(1, dashInner.offsetHeight)) : 1;
-          dashInner.style.width = `${100 / fitS}%`;
+          css(dashInner, "width", `${(100 / fitS).toFixed(2)}%`);
           const room = Math.max(0, dashInner.offsetHeight * fitS - dashEl.clientHeight);
-          dashInner.style.transform = `translateY(${-room * (1 - smooth(ramp(q, 0.966, 0.996)))}px) scale(${fitS})`;
+          css(dashInner, "transform", `translateY(${(-room * (1 - smooth(ramp(q, 0.966, 0.996)))).toFixed(1)}px) scale(${fitS.toFixed(4)})`);
         }
-        el.style.opacity = String(1 - ramp(q, 0.954, 0.966));
+        css(el, "opacity", (1 - ramp(q, 0.954, 0.966)).toFixed(3));
 
         // page colours
         const th = themeAt(q);
-        wrap.style.setProperty("--c-bg", th.bg);
-        wrap.style.setProperty("--c-fg", th.fg);
-        wrap.style.setProperty("--c-muted", th.muted);
+        css(wrap, "--c-bg", th.bg);
+        css(wrap, "--c-fg", th.fg);
+        css(wrap, "--c-muted", th.muted);
 
-        // the model
+        // the model (shadows are redrawn only when something that casts them moves)
         const morph = ramp(q, 0.905, 0.945);
-        floor.set({
+        const state = {
           // the room builds up, and sinks back into the code while its numbers become the chart
           rise: ramp(q, 0.05, 0.215) * (1 - ramp(q, 0.9, 0.94)),
           line: q < 0.79 ? ramp(q, 0.54, 0.575) : 1 - 0.22 * ramp(q, 0.79, 0.83),
@@ -278,7 +309,8 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
           route: th.route,
           order: ramp(q, 0.582, 0.625) * (1 - ramp(q, 0.79, 0.81)),
           bill: ramp(q, 0.737, 0.775) * (1 - ramp(q, 0.79, 0.81)),
-        });
+        };
+        floor.set(state);
 
         // camera
         const w = el.clientWidth || 1;
@@ -298,7 +330,12 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         else camera.setViewOffset(w, h, 0, 0.11 * h, w, h);
         camera.updateProjectionMatrix();
         camera.updateMatrixWorld();
-        if (q > 0.86) measureChart();
+        const shadowKey = `${state.rise.toFixed(3)} ${state.book.toFixed(3)} ${state.dish.toFixed(3)} ${dishLoaded}`;
+        if (shadowKey !== lastShadow) {
+          lastShadow = shadowKey;
+          renderer.shadowMap.needsUpdate = true;
+        }
+        if (q > 0.86 && q < 0.96) measureChart();
         renderer.render(scene, camera);
 
         const settled = q === p && Math.abs(side - want) < 1e-3;
@@ -306,6 +343,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
       };
       const run = () => {
         if (!raf && visible) {
+          chained = false;
           last = performance.now();
           raf = requestAnimationFrame(frame);
         }
@@ -324,6 +362,24 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         if (visible) run();
       });
       io.observe(wrap);
+      const warm = async () => {
+        const hidden: T.Object3D[] = [];
+        scene.traverse((o) => {
+          if (!o.visible) {
+            hidden.push(o);
+            o.visible = true;
+          }
+        });
+        try {
+          await renderer.compileAsync(scene, camera);
+        } catch {
+          // compiling up front is only an optimisation
+        }
+        hidden.forEach((o) => (o.visible = false));
+      };
+      camera.aspect = (el.clientWidth || 1) / (el.clientHeight || 1);
+      await warm();
+      if (disposed) return;
       resize();
 
       // the real 3D dish (the same model as the demo), loaded once the room is on screen
@@ -334,6 +390,12 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
       new GLTFLoader().setDRACOLoader(draco).load("/models/burger.glb", (gltf) => {
         if (disposed) return;
         floor.addDish(gltf.scene);
+        gltf.scene.traverse((o) => {
+          const m = (o as T.Mesh).material as T.MeshStandardMaterial | undefined;
+          if (m) [m.map, m.normalMap, m.roughnessMap].forEach((t) => t && renderer.initTexture(t));
+        });
+        dishLoaded = true;
+        warm();
         draco.dispose();
         run();
       });
@@ -369,7 +431,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
   );
 
   return (
-    <div ref={root} className="relative" style={{ height: "1500svh", background: "var(--c-bg)", color: "var(--c-fg)", ["--c-bg" as string]: PAPER.bg, ["--c-fg" as string]: PAPER.fg, ["--c-muted" as string]: PAPER.muted }}>
+    <div ref={root} data-floor-story className="relative" style={{ height: "1500svh", background: "var(--c-bg)", color: "var(--c-fg)", ["--c-bg" as string]: PAPER.bg, ["--c-fg" as string]: PAPER.fg, ["--c-muted" as string]: PAPER.muted }}>
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={host} className="absolute inset-0" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] sm:hidden" style={{ background: "linear-gradient(transparent, var(--c-bg) 42%)" }} />
@@ -416,7 +478,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         {/* dashboard frame round the floor (sample data, same numbers as the dashboard below) */}
         <div data-admin data-tab="floor" className="group pointer-events-none absolute inset-x-3 top-20 bottom-[36svh] opacity-0 sm:inset-x-auto sm:top-[8svh] sm:right-[3vw] sm:bottom-[8svh] sm:w-[min(58vw,62rem)]">
           <div className="flex h-full flex-col overflow-hidden rounded-2xl ring-1 ring-black/10" style={{ boxShadow: "0 30px 90px -40px rgba(13,12,11,.35)" }}>
-            <div className="flex items-center gap-3 border-b border-black/10 bg-[#fbfaf7]/90 px-4 py-2.5 text-xs text-[#5f5e5c] backdrop-blur">
+            <div className="flex items-center gap-3 border-b border-black/10 bg-[#fbfaf7] px-4 py-2.5 text-xs text-[#5f5e5c]">
               <span className="flex gap-1.5">
                 {[0, 1, 2].map((i) => <span key={i} className="size-2.5 rounded-full bg-black/10" />)}
               </span>
@@ -438,14 +500,14 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
                 ["Waiting > 10 min", "3 tables", "Orders today", "132"],
                 ["Open bills", "6", "Busiest hour", "20:00"],
               ].map(([a, av, b, bv]) => (
-                <div key={a} className="bg-[#fbfaf7]/90 px-4 py-2.5 backdrop-blur">
+                <div key={a} className="bg-[#fbfaf7] px-4 py-2.5">
                   <p className="text-[11px] text-[#5f5e5c]"><span className="group-data-[tab=analytics]:hidden">{a}</span><span className="hidden group-data-[tab=analytics]:inline">{b}</span></p>
                   <p className="text-sm font-medium sm:text-base"><span className="group-data-[tab=analytics]:hidden">{av}</span><span className="hidden group-data-[tab=analytics]:inline">{bv}</span></p>
                 </div>
               ))}
             </div>
             <div className="flex-1" />
-            <p className="bg-[#fbfaf7]/90 px-4 py-2 text-[10px] text-[#8a8884] backdrop-blur">Sample data · <span className="group-data-[tab=analytics]:hidden">tables by status</span><span className="hidden group-data-[tab=analytics]:inline">orders by table, then by hour</span></p>
+            <p className="bg-[#fbfaf7] px-4 py-2 text-[10px] text-[#8a8884]">Sample data · <span className="group-data-[tab=analytics]:hidden">tables by status</span><span className="hidden group-data-[tab=analytics]:inline">orders by table, then by hour</span></p>
           </div>
         </div>
 

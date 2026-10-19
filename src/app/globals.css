@@ -207,3 +207,10 @@ details > summary::-webkit-details-marker {
     top: calc(100% - 0.75rem);
   }
 }
+
+/* Under the floor story's live 3D canvas a multiply-blended full-screen grain costs a full
+   recomposite every frame; a plain faint grain looks the same there and costs nothing. */
+body:has([data-floor-story])::after {
+  mix-blend-mode: normal;
+  opacity: 0.05;
+}

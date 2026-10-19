@@ -141,6 +141,14 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     return cellDelay.get(k)!;
   };
 
+  // a little person: legs, body, head (and a chef's hat); `yaw` 0 faces +z
+  const person = (x: number, z: number, yaw: number, shirt: string, delay: number, hat = false) => {
+    add(box(0.26, 0.48, 0.15), { color: "#2f2b28", delay, at: [x, 0, z], yaw });
+    add(cyl(0.15, 0.18, 0.5, 14), { color: shirt, delay, at: [x, 0.48, z], hull: true, edge: 40 });
+    add(new THREE.SphereGeometry(0.11, 14, 10).translate(0, 0.11, 0), { color: "#e2b48e", delay, at: [x, 0.99, z], hull: true, edge: false });
+    if (hat) add(cyl(0.11, 0.09, 0.16, 14), { color: "#fbfaf7", delay, at: [x, 1.18, z], hull: true, edge: 40 });
+  };
+
   // ---- rooms in the three finder squares: walls round the ring (with a door), a counter in the core
   const rooms = finderAt(n);
   const doors = [
@@ -184,24 +192,75 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     const cx = W(ox + 3);
     const cz = W(oy + 3);
     const d1 = d0 + 0.04;
+    const at = (x: number, y: number, z: number): [number, number, number] => [cx + x, y, cz + z];
+    const d2 = d1 + 0.04;
+    const d3 = d1 + 0.08;
     if (r === 0) {
-      // kitchen: a steel range with burners and two tomato-red pots
-      add(box(2.8, 0.92, 2.8), { color: COLORS.steel, delay: d1, at: [cx, 0, cz] });
-      for (const [bx, bz] of [[-0.65, -0.65], [0.65, -0.65], [-0.65, 0.65], [0.65, 0.65]]) add(cyl(0.34, 0.34, 0.04), { color: COLORS.dark, delay: d1, at: [cx + bx, 0.92, cz + bz], hull: true, edge: 30 });
-      add(cyl(0.3, 0.28, 0.36), { color: COLORS.tomato, delay: d1 + 0.03, at: [cx - 0.65, 0.96, cz - 0.65], hull: true, edge: 30 });
-      add(cyl(0.26, 0.26, 0.22), { color: COLORS.tomato, delay: d1 + 0.03, at: [cx + 0.65, 0.96, cz + 0.65], hull: true, edge: 30 });
+      // kitchen (door on +x): a steel range in the middle, counters round the walls, two chefs
+      add(box(2.8, 0.92, 2.8), { color: COLORS.steel, delay: d1, at: at(0, 0, 0) });
+      for (const [bx, bz] of [[-0.65, -0.65], [0.65, -0.65], [-0.65, 0.65], [0.65, 0.65]]) add(cyl(0.34, 0.34, 0.04), { color: COLORS.dark, delay: d1, at: at(bx, 0.92, bz), hull: true, edge: 30 });
+      // oven door, handle and knobs on the front
+      add(box(1.7, 0.45, 0.03), { color: COLORS.dark, delay: d1, at: at(0, 0.12, 1.41) });
+      add(box(1.3, 0.04, 0.05), { color: "#e9ecea", delay: d1, at: at(0, 0.63, 1.44) });
+      for (let k = 0; k < 4; k++) add(cyl(0.05, 0.05, 0.05, 12), { color: COLORS.dark, delay: d1, at: at(-1.05 + k * 0.7, 0.76, 1.4), tilt: Math.PI / 2, edge: 30 });
+      // a lidded stock pot, a sauce pot and a frying pan with its handle
+      add(cyl(0.3, 0.28, 0.36), { color: COLORS.tomato, delay: d2, at: at(-0.65, 0.96, -0.65), hull: true, edge: 30 });
+      add(cyl(0.31, 0.31, 0.03), { color: "#e9ecea", delay: d2, at: at(-0.65, 1.32, -0.65), hull: true, edge: 30 });
+      add(cyl(0.05, 0.05, 0.05, 10), { color: COLORS.dark, delay: d2, at: at(-0.65, 1.35, -0.65), edge: 30 });
+      add(cyl(0.2, 0.2, 0.18), { color: COLORS.tomato, delay: d2, at: at(0.65, 0.96, -0.65), hull: true, edge: 30 });
+      add(cyl(0.23, 0.2, 0.05), { color: COLORS.dark, delay: d2, at: at(0.65, 0.96, 0.65), hull: true, edge: 30 });
+      add(box(0.34, 0.03, 0.06), { color: COLORS.dark, delay: d2, at: at(1.05, 0.98, 0.65) });
+      // counters: along the back wall (plates, tickets pinned above) and the side wall (sink, board)
+      add(box(4.6, 0.9, 0.62), { color: "#d9dcda", delay: d2, at: at(0, 0, -2.36) });
+      add(box(0.62, 0.9, 2.95), { color: "#d9dcda", delay: d2, at: at(-2.36, 0, 0.12) });
+      for (let k = 0; k < 4; k++) add(cyl(0.16, 0.14, 0.025, 20), { color: COLORS.card, delay: d3, at: at(1.5, 0.9 + k * 0.03, -2.36), hull: true, edge: 40 });
+      for (let k = 0; k < 4; k++) add(box(0.13, 0.17, 0.01), { color: COLORS.card, delay: d3, at: at(-0.6 + k * 0.32, 0.95, -2.67) });
+      add(box(1.5, 0.03, 0.03), { color: COLORS.dark, delay: d3, at: at(-0.12, 1.12, -2.67) });
+      add(box(0.46, 0.02, 0.62), { color: "#7d8583", delay: d3, at: at(-2.36, 0.9, -0.45) });
+      add(cyl(0.025, 0.025, 0.28, 8), { color: "#e9ecea", delay: d3, at: at(-2.58, 0.9, -0.45), edge: false });
+      add(box(0.42, 0.03, 0.3), { color: COLORS.table, delay: d3, at: at(-2.36, 0.9, 0.75) });
+      add(box(0.05, 0.015, 0.24), { color: "#e9ecea", delay: d3, at: at(-2.2, 0.93, 0.75) });
+      // a tall fridge in the corner
+      add(box(0.62, 1.9, 0.82), { color: "#eef0ee", delay: d2, at: at(-2.36, 0, 2.2) });
+      add(box(0.03, 0.7, 0.04), { color: COLORS.dark, delay: d2, at: at(-2.04, 0.9, 1.95) });
+      person(cx + 1.95, cz + 0.6, -Math.PI / 2, "#f4f2ee", d3, true);
+      person(cx + 0.4, cz + 2.05, Math.PI, "#f4f2ee", d3, true);
     } else if (r === 1) {
-      // bar: a counter with bottles, stools on the free ring inside the room
-      add(box(2.8, 1.0, 2.8), { color: COLORS.table, delay: d1, at: [cx, 0, cz] });
-      for (let k = 0; k < 6; k++) add(cyl(0.07, 0.09, 0.42, 10), { color: COLORS.bottle, delay: d1 + 0.03, at: [cx - 0.9 + k * 0.36, 1.0, cz - 0.9], hull: true, edge: 40 });
-      for (const sx of [-1, 0, 1]) add(cyl(0.2, 0.16, 0.7, 14), { color: COLORS.leg, delay: d1 + 0.05, at: [cx + sx * 0.95, 0, cz + 2.05], hull: true, edge: 30 });
+      // bar (door on -x): counter with bottles, taps and a coffee machine, a back shelf, a bartender
+      add(box(2.8, 1.0, 2.8), { color: COLORS.table, delay: d1, at: at(0, 0, 0) });
+      for (let k = 0; k < 6; k++) add(cyl(0.07, 0.09, 0.42, 10), { color: COLORS.bottle, delay: d2, at: at(-0.9 + k * 0.36, 1.0, -0.9), hull: true, edge: 40 });
+      for (let k = 0; k < 3; k++) {
+        add(cyl(0.025, 0.025, 0.32, 8), { color: "#c3c6c4", delay: d2, at: at(0.55 + k * 0.22, 1.0, 0.95), edge: false });
+        add(box(0.05, 0.12, 0.05), { color: COLORS.tomato, delay: d2, at: at(0.55 + k * 0.22, 1.32, 0.95) });
+      }
+      for (let k = 0; k < 4; k++) add(cyl(0.055, 0.045, 0.13, 12), { color: "#dfeaec", delay: d3, at: at(-0.2 + k * 0.16, 1.0, 1.1), hull: true, edge: 40 });
+      add(box(0.5, 0.42, 0.4), { color: COLORS.steel, delay: d2, at: at(-0.85, 1.0, 0.55) });
+      add(box(0.3, 0.05, 0.12), { color: COLORS.dark, delay: d2, at: at(-0.85, 1.22, 0.78) });
+      add(box(4.4, 1.05, 0.36), { color: "#8a5a3a", delay: d2, at: at(0, 0, -2.45) });
+      const glassColors = [COLORS.bottle, "#b0702b", "#d8e3e0", "#6e2a1f"];
+      for (let k = 0; k < 11; k++) add(cyl(0.06, 0.08, 0.36, 10), { color: glassColors[k % 4], delay: d3, at: at(-2 + k * 0.4, 1.05, -2.45), hull: true, edge: 40 });
+      for (const sx of [-1, 0, 1]) add(cyl(0.2, 0.16, 0.7, 14), { color: COLORS.leg, delay: d2, at: at(sx * 0.95, 0, 2.05), hull: true, edge: 30 });
+      person(cx + 0.35, cz - 1.85, 0, "#1d3b2e", d3);
     } else {
-      // till: counter, register and screen
-      add(box(2.8, 0.95, 2.8), { color: COLORS.counter, delay: d1, at: [cx, 0, cz] });
-      add(box(0.7, 0.32, 0.55), { color: COLORS.dark, delay: d1 + 0.03, at: [cx + 0.5, 0.95, cz] });
-      add(box(0.62, 0.42, 0.05), { color: COLORS.dark, delay: d1 + 0.04, at: [cx + 0.5, 1.27, cz - 0.1], tilt: -0.3 });
-      add(cyl(0.22, 0.17, 0.3), { color: COLORS.pot, delay: d1 + 0.03, at: [cx - 0.7, 0.95, cz - 0.6], hull: true, edge: 30 });
-      add(new THREE.IcosahedronGeometry(0.32, 0), { color: COLORS.leaf, delay: d1 + 0.05, at: [cx - 0.7, 1.5, cz - 0.6] });
+      // till (door on +x): counter with register, card terminal, receipt printer and a bill tray;
+      // a cake display, a bench for guests, the cashier and a guest paying
+      add(box(2.8, 0.95, 2.8), { color: COLORS.counter, delay: d1, at: at(0, 0, 0) });
+      add(box(0.7, 0.32, 0.55), { color: COLORS.dark, delay: d2, at: at(0.5, 0.95, 0) });
+      add(box(0.62, 0.42, 0.05), { color: COLORS.dark, delay: d2, at: at(0.5, 1.27, -0.1), tilt: -0.3 });
+      add(box(0.12, 0.22, 0.06), { color: COLORS.dark, delay: d3, at: at(1.1, 0.95, 0.8), tilt: -0.35 });
+      add(box(0.08, 0.06, 0.01), { color: COLORS.tomato, delay: d3, at: at(1.1, 1.08, 0.79), tilt: -0.35, edge: false });
+      add(box(0.24, 0.14, 0.22), { color: "#d8d4cd", delay: d3, at: at(1.0, 0.95, -0.75) });
+      add(box(0.12, 0.2, 0.006), { color: COLORS.card, delay: d3, at: at(1.0, 1.09, -0.66), tilt: 0.25, edge: false });
+      add(box(0.3, 0.02, 0.18), { color: COLORS.dark, delay: d3, at: at(0.15, 0.95, 0.95) });
+      add(box(0.13, 0.006, 0.16), { color: COLORS.card, delay: d3, at: at(0.15, 0.97, 0.95), edge: false });
+      add(cyl(0.09, 0.09, 0.18, 14), { color: "#cfe0e3", delay: d3, at: at(-0.45, 0.95, 0.95), hull: true, edge: 40 });
+      add(cyl(0.22, 0.17, 0.3), { color: COLORS.pot, delay: d2, at: at(-0.7, 0.95, -0.6), hull: true, edge: 30 });
+      add(new THREE.IcosahedronGeometry(0.32, 0), { color: COLORS.leaf, delay: d3, at: at(-0.7, 1.5, -0.6) });
+      add(box(0.62, 0.85, 2.6), { color: "#e7ded2", delay: d2, at: at(-2.36, 0, 0) });
+      ["#f3d9c4", "#6b3f2a", "#e8b8c8"].forEach((c, k) => add(cyl(0.2, 0.2, 0.16, 20), { color: c, delay: d3, at: at(-2.36, 0.85, -0.8 + k * 0.8), hull: true, edge: 40 }));
+      add(box(2.2, 0.42, 0.45), { color: COLORS.table, delay: d2, at: at(0.2, 0, 2.3) });
+      person(cx + 0.2, cz - 2.05, 0, "#1d3b2e", d3);
+      person(cx + 2.05, cz + 0.45, -Math.PI / 2, "#c8873f", d3);
     }
   });
 
@@ -467,7 +526,7 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const bar = new THREE.Vector3(W(n - 4), 1.0, W(3));
   const till = new THREE.Vector3(W(3), 1.0, W(n - 4));
   const orderRoute = route(kitchen);
-  const billRoute = route(till.clone().add(new THREE.Vector3(-0.55, -0.02, 0.75)));
+  const billRoute = route(till.clone().add(new THREE.Vector3(0.15, -0.01, 0.95))); // lands on the bill tray
 
   // ---- the hero table's menu book: closed on the table, it opens on a dish with its own QR code
   const horiz = pick.cells.length > 1 && pick.cells[0][1] === pick.cells[1][1];

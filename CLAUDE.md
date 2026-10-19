@@ -157,6 +157,12 @@ bars fly together as bricks and land exactly on the dashboard's "Busiest hours" 
 measures `[data-hour-bar]` on screen and maps them onto the 3D chart's plane; the camera ends
 straight-on) -> the real `OwnerDashboard` fades in over them, the 3D scene fades out -> (the user's favourite) scrolled through as the finale. One merged-geometry scene, one shader `rise`; clay and line looks
 share meshes (paper-coloured faces + 20° edges + inverted-hull outlines, LightGearLab's method).
+Rooms (2026-10-19): kitchen (range with oven door/knobs, lidded pot, pan, wall counters with sink,
+board, plates, tickets pinned on the wall, fridge, two chefs), bar (back shelf of bottles, taps, glasses,
+coffee machine, bartender), till (card terminal, receipt printer, bill tray where the bill line lands,
+tip jar, cake display, bench, cashier, a guest paying). Smoothness: shadows redrawn only when the room
+changes (`shadowMap.autoUpdate = false`), shaders/textures compiled up front (`compileAsync`),
+adaptive pixel ratio, style writes only on change, no backdrop blur or multiply grain over the canvas.
 Draft copy, sample data: confirm the dashboard features before any of it goes on the homepage.
 
 3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): rebuilt (2026-10-18) from
