@@ -112,7 +112,9 @@ Decided / waiting on the user:
 - **Realism**: the procedural burger is the current best; a real photogrammetry
   scan (or the team's own filmed build) would beat it. Don't use the reference
   YouTube clip itself on the site (not ours).
-- **Contact email** stays a placeholder until the user provides one.
+- **Launch** (user said "launch", 2026-10-19): stays on onrender.com, free plan, brand "QR Menu".
+  robots.txt + sitemap.xml (all locales, hreflang) and `app/icon.svg` (logo mark) added.
+- **Contact email** still a placeholder: the user is giving the real sales inbox (change `CONTACT_EMAIL`).
 - **Translations**: the user is reviewing de/fr/es/ru. Azerbaijani and Turkish added 2026-10-19
   (machine-quality first drafts by Claude: get a native speaker to read them before launch). Azerbaijani
   numbers are formatted with the German rules (identical, and every browser has them).
