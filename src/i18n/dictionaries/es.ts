@@ -225,6 +225,118 @@ const es: Dictionary = {
     tagline: "Cartas en 3D y gestión de restaurantes.",
     rights: "Todos los derechos reservados.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "Cartas QR para restaurantes",
+      "title": "Tu restaurante en un código QR",
+      "text": "Desde un plato en 3D en la mesa de tus clientes hasta todo el salón en tu pantalla.",
+      "scroll": "Desliza ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · El salón",
+        "title": "Cada casilla es una mesa",
+        "text": "Tu código en la puerta y en cada mesa. Los clientes lo escanean y el restaurante se abre en su móvil."
+      },
+      {
+        "eyebrow": "02 · La carta",
+        "title": "Conserva tu carta",
+        "text": "Impresa o digital, cada plato tiene su propio código QR al lado."
+      },
+      {
+        "eyebrow": "03 · Un código por plato",
+        "title": "Apunta con la cámara",
+        "text": "Los clientes escanean el código junto a un plato con la cámara del móvil. Sin instalar ninguna app."
+      },
+      {
+        "eyebrow": "04 · El plato en 3D",
+        "title": "Míralo en tu mesa",
+        "text": "El plato aparece justo ahí, a tamaño real y en 3D, antes de que nadie lo pida."
+      },
+      {
+        "eyebrow": "05 · Pedido",
+        "title": "Pide desde la mesa",
+        "text": "El pedido va directo a la cocina, con el número de mesa."
+      },
+      {
+        "eyebrow": "06 · Cocina",
+        "title": "La cocina lo sabe",
+        "text": "Quién pidió qué y cuánto tiempo lleva esperando cada mesa."
+      },
+      {
+        "eyebrow": "07 · Cuenta",
+        "title": "La cuenta, sin esperas",
+        "text": "Cada cuenta sigue a su mesa, así que pagar lleva un minuto."
+      },
+      {
+        "eyebrow": "08 · Tu salón, en directo",
+        "title": "Todo el salón en una pantalla",
+        "text": "Qué mesas están libres, comiendo, esperando o pagando, de un vistazo."
+      },
+      {
+        "eyebrow": "09 · Analítica",
+        "title": "Sabe qué se vende",
+        "text": "Los pedidos de cada mesa se suman: ventas, platos estrella, horas punta y vistas en 3D, desde el mismo sistema."
+      }
+    ],
+    "tryIt": "Pruébalo tú mismo",
+    "legend": [
+      "Libre",
+      "Comiendo",
+      "Espera larga",
+      "Pagando"
+    ],
+    "frame": {
+      "dashboard": "Panel",
+      "tabs": [
+        "Salón",
+        "Pedidos",
+        "Carta",
+        "Analítica"
+      ],
+      "floorKpis": [
+        [
+          "Ocupadas",
+          "14 / 22"
+        ],
+        [
+          "Espera > 10 min",
+          "3 mesas"
+        ],
+        [
+          "Cuentas abiertas",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Ventas de hoy",
+        "Pedidos de hoy",
+        "Hora punta"
+      ],
+      "sample": "Datos de ejemplo",
+      "byStatus": "mesas por estado",
+      "byHour": "pedidos por mesa y luego por hora"
+    },
+    "book": {
+      "menu": "Carta",
+      "place": "Trattoria",
+      "scan3d": "escanea para verlo en 3D",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Ensalada César",
+        "Tagliatelle",
+        "Tiramisú"
+      ],
+      "pick": "Sugerencia del chef",
+      "dish": "Hamburguesa con queso",
+      "desc": "Brioche, cheddar curado, pepinillos",
+      "scan": [
+        "Escanéalo y mira el plato",
+        "en tu mesa"
+      ]
+    }
+  },
 };
 
 export default es;

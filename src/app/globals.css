@@ -147,6 +147,17 @@ body::after {
     line-height: 0.94;
     letter-spacing: 0.004em;
   }
+  /* Tall condensed capitals sit tight in English, but marks above and below capitals
+     (İ Ş Ç Ğ Ö Ü in Azerbaijani and Turkish, Ä É Ñ elsewhere) need room between lines. */
+  :lang(az) .headline,
+  :lang(tr) .headline {
+    line-height: 1.12;
+  }
+  :lang(de) .headline,
+  :lang(fr) .headline,
+  :lang(es) .headline {
+    line-height: 1.02;
+  }
   /* The brief's black pill CTA. Sizes come from utilities at the call site. */
   .pill {
     display: inline-flex;

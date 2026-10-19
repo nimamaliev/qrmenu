@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { hasLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import BurgerStory from "@/components/home/hero/BurgerStory";
-import TryIt from "@/components/home/TryIt";
-import { Contact, Faq, HowItWorks, Owners, Plans } from "@/components/home/Sections";
+import { SITE_URL } from "@/lib/site";
+import FloorStory from "@/components/home/floor/FloorStory";
+import { Contact, Faq, HowItWorks, Plans } from "@/components/home/Sections";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
@@ -12,10 +12,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
-      <BurgerStory hero={dict.hero} story={dict.story} />
-      <TryIt lang={lang} journey={dict.journey} />
+      <FloorStory url={new URL(`/${lang}/demo`, SITE_URL).toString()} lang={lang} copy={dict.floor} owners={dict.owners} menu={dict.menu} />
       <HowItWorks how={dict.how} />
-      <Owners lang={lang} owners={dict.owners} menu={dict.menu} />
       <Plans plans={dict.plans} />
       <Faq faq={dict.faq} />
       <Contact cta={dict.cta} />

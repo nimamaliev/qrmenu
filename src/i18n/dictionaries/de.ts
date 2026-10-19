@@ -225,6 +225,118 @@ const de: Dictionary = {
     tagline: "3D-Speisekarten und Restaurantverwaltung.",
     rights: "Alle Rechte vorbehalten.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "QR-Menüs für Restaurants",
+      "title": "Ihr Restaurant in einem QR-Code",
+      "text": "Vom Gericht in 3D auf dem Tisch Ihrer Gäste bis zum ganzen Raum auf Ihrem Bildschirm.",
+      "scroll": "Scrollen ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · Der Raum",
+        "title": "Jedes Feld ist ein Tisch",
+        "text": "Ihr Code an der Tür und auf jedem Tisch. Gäste scannen ihn, und das Restaurant öffnet sich auf ihrem Handy."
+      },
+      {
+        "eyebrow": "02 · Die Karte",
+        "title": "Behalten Sie Ihre Karte",
+        "text": "Gedruckt oder digital: Jedes Gericht bekommt seinen eigenen QR-Code daneben."
+      },
+      {
+        "eyebrow": "03 · Ein Code pro Gericht",
+        "title": "Kamera drauf",
+        "text": "Gäste scannen den Code neben einem Gericht mit der Handykamera. Keine App nötig."
+      },
+      {
+        "eyebrow": "04 · Das Gericht in 3D",
+        "title": "Direkt auf dem Tisch",
+        "text": "Das Gericht erscheint genau dort, in Originalgröße und in 3D, bevor es überhaupt bestellt ist."
+      },
+      {
+        "eyebrow": "05 · Bestellung",
+        "title": "Bestellt am Tisch",
+        "text": "Die Bestellung geht direkt in die Küche, mit der Tischnummer darauf."
+      },
+      {
+        "eyebrow": "06 · Küche",
+        "title": "Die Küche weiß Bescheid",
+        "text": "Wer was bestellt hat und wie lange jeder Tisch schon wartet."
+      },
+      {
+        "eyebrow": "07 · Rechnung",
+        "title": "Die Rechnung ohne Warten",
+        "text": "Jede Rechnung gehört zu ihrem Tisch, so dauert das Bezahlen nur eine Minute."
+      },
+      {
+        "eyebrow": "08 · Ihr Raum, live",
+        "title": "Der ganze Raum auf einem Bildschirm",
+        "text": "Welche Tische frei sind, essen, warten oder zahlen, auf einen Blick."
+      },
+      {
+        "eyebrow": "09 · Analysen",
+        "title": "Wissen, was sich verkauft",
+        "text": "Die Bestellungen aller Tische ergeben Umsatz, Top-Gerichte, Stoßzeiten und 3D-Aufrufe, aus demselben System."
+      }
+    ],
+    "tryIt": "Selbst ausprobieren",
+    "legend": [
+      "Frei",
+      "Isst",
+      "Wartet lange",
+      "Zahlt"
+    ],
+    "frame": {
+      "dashboard": "Dashboard",
+      "tabs": [
+        "Raum",
+        "Bestellungen",
+        "Karte",
+        "Analysen"
+      ],
+      "floorKpis": [
+        [
+          "Besetzt",
+          "14 / 22"
+        ],
+        [
+          "Wartet > 10 Min.",
+          "3 Tische"
+        ],
+        [
+          "Offene Rechnungen",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Umsatz heute",
+        "Bestellungen heute",
+        "Stoßzeit"
+      ],
+      "sample": "Beispieldaten",
+      "byStatus": "Tische nach Status",
+      "byHour": "Bestellungen nach Tisch, dann nach Stunde"
+    },
+    "book": {
+      "menu": "Speisekarte",
+      "place": "Trattoria",
+      "scan3d": "scannen und in 3D sehen",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Caesar Salad",
+        "Tagliatelle",
+        "Tiramisu"
+      ],
+      "pick": "Empfehlung des Hauses",
+      "dish": "Cheeseburger",
+      "desc": "Brioche, gereifter Cheddar, Gurken",
+      "scan": [
+        "Scannen und das Gericht",
+        "auf Ihrem Tisch sehen"
+      ]
+    }
+  },
 };
 
 export default de;

@@ -223,6 +223,118 @@ const en = {
     tagline: "3D digital menus and restaurant management.",
     rights: "All rights reserved.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "QR menus for restaurants",
+      "title": "Your restaurant in one QR code",
+      "text": "From a dish in 3D on your guest's table to the whole room on your screen.",
+      "scroll": "Scroll ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · The floor",
+        "title": "Every square is a table",
+        "text": "Your code at the door and on every table. Guests scan it, and the restaurant opens on their phone."
+      },
+      {
+        "eyebrow": "02 · The menu",
+        "title": "Keep your menu",
+        "text": "Printed or digital, every dish gets its own QR code next to it."
+      },
+      {
+        "eyebrow": "03 · One code per dish",
+        "title": "Point the camera",
+        "text": "Guests scan the code beside a dish with their phone camera. No app to install."
+      },
+      {
+        "eyebrow": "04 · The dish in 3D",
+        "title": "See it on your table",
+        "text": "The dish appears right there, life-size and in 3D, before anyone orders it."
+      },
+      {
+        "eyebrow": "05 · Order",
+        "title": "Order from the table",
+        "text": "The order goes straight to the kitchen, with the table number on it."
+      },
+      {
+        "eyebrow": "06 · Kitchen",
+        "title": "The kitchen knows",
+        "text": "Who ordered what, and how long each table has been waiting."
+      },
+      {
+        "eyebrow": "07 · Bill",
+        "title": "The bill, without the wait",
+        "text": "Each bill follows its table, so paying takes a minute."
+      },
+      {
+        "eyebrow": "08 · Your floor, live",
+        "title": "The whole room on one screen",
+        "text": "Which tables are free, eating, waiting or paying, at a glance."
+      },
+      {
+        "eyebrow": "09 · Analytics",
+        "title": "Know what sells",
+        "text": "Every table's orders add up: sales, top dishes, peak hours and 3D views, from the same system."
+      }
+    ],
+    "tryIt": "Try it yourself",
+    "legend": [
+      "Free",
+      "Eating",
+      "Waiting long",
+      "Paying"
+    ],
+    "frame": {
+      "dashboard": "Dashboard",
+      "tabs": [
+        "Floor",
+        "Orders",
+        "Menu",
+        "Analytics"
+      ],
+      "floorKpis": [
+        [
+          "Seated",
+          "14 / 22"
+        ],
+        [
+          "Waiting > 10 min",
+          "3 tables"
+        ],
+        [
+          "Open bills",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Sales today",
+        "Orders today",
+        "Busiest hour"
+      ],
+      "sample": "Sample data",
+      "byStatus": "tables by status",
+      "byHour": "orders by table, then by hour"
+    },
+    "book": {
+      "menu": "Menu",
+      "place": "Trattoria",
+      "scan3d": "scan to see it in 3D",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Caesar salad",
+        "Tagliatelle",
+        "Tiramisu"
+      ],
+      "pick": "Chef's pick",
+      "dish": "Cheeseburger",
+      "desc": "Brioche, aged cheddar, pickles",
+      "scan": [
+        "Scan it and see the dish",
+        "on your table"
+      ]
+    }
+  },
 };
 
 export default en;

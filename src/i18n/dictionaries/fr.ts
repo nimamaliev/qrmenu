@@ -225,6 +225,118 @@ const fr: Dictionary = {
     tagline: "Menus 3D et gestion de restaurant.",
     rights: "Tous droits réservés.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "Menus QR pour restaurants",
+      "title": "Votre restaurant dans un QR code",
+      "text": "Du plat en 3D sur la table de vos clients à toute la salle sur votre écran.",
+      "scroll": "Faites défiler ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · La salle",
+        "title": "Chaque case est une table",
+        "text": "Votre code à l'entrée et sur chaque table. Les clients le scannent et le restaurant s'ouvre sur leur téléphone."
+      },
+      {
+        "eyebrow": "02 · La carte",
+        "title": "Gardez votre carte",
+        "text": "Imprimée ou numérique, chaque plat a son propre QR code à côté."
+      },
+      {
+        "eyebrow": "03 · Un code par plat",
+        "title": "Un coup d'appareil photo",
+        "text": "Les clients scannent le code à côté d'un plat avec l'appareil photo de leur téléphone. Aucune appli à installer."
+      },
+      {
+        "eyebrow": "04 · Le plat en 3D",
+        "title": "Voyez-le sur votre table",
+        "text": "Le plat apparaît juste là, en taille réelle et en 3D, avant même d'être commandé."
+      },
+      {
+        "eyebrow": "05 · Commande",
+        "title": "Commander depuis la table",
+        "text": "La commande part directement en cuisine, avec le numéro de table."
+      },
+      {
+        "eyebrow": "06 · Cuisine",
+        "title": "La cuisine est au courant",
+        "text": "Qui a commandé quoi, et depuis combien de temps chaque table attend."
+      },
+      {
+        "eyebrow": "07 · Addition",
+        "title": "L'addition, sans attendre",
+        "text": "Chaque addition suit sa table : payer ne prend qu'une minute."
+      },
+      {
+        "eyebrow": "08 · Votre salle, en direct",
+        "title": "Toute la salle sur un seul écran",
+        "text": "Les tables libres, qui mangent, qui attendent ou qui paient, en un coup d'œil."
+      },
+      {
+        "eyebrow": "09 · Analyses",
+        "title": "Sachez ce qui se vend",
+        "text": "Les commandes de chaque table s'additionnent : ventes, plats phares, heures de pointe et vues 3D, dans le même système."
+      }
+    ],
+    "tryIt": "Essayez vous-même",
+    "legend": [
+      "Libre",
+      "Mange",
+      "Attend longtemps",
+      "Paie"
+    ],
+    "frame": {
+      "dashboard": "Tableau de bord",
+      "tabs": [
+        "Salle",
+        "Commandes",
+        "Carte",
+        "Analyses"
+      ],
+      "floorKpis": [
+        [
+          "Occupées",
+          "14 / 22"
+        ],
+        [
+          "Attente > 10 min",
+          "3 tables"
+        ],
+        [
+          "Additions ouvertes",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Ventes du jour",
+        "Commandes du jour",
+        "Heure de pointe"
+      ],
+      "sample": "Données d'exemple",
+      "byStatus": "tables par statut",
+      "byHour": "commandes par table, puis par heure"
+    },
+    "book": {
+      "menu": "Carte",
+      "place": "Trattoria",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Salade César",
+        "Tagliatelle",
+        "Tiramisu"
+      ],
+      "pick": "Suggestion du chef",
+      "dish": "Cheeseburger",
+      "desc": "Brioche, cheddar affiné, cornichons",
+      "scan": [
+        "Scannez et voyez le plat",
+        "sur votre table"
+      ],
+      "scan3d": "scannez pour le voir en 3D"
+    }
+  },
 };
 
 export default fr;

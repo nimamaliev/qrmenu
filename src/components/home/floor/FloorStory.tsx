@@ -10,26 +10,28 @@ import OwnerDashboard from "@/components/home/OwnerDashboard";
 import { buildFloor, STATUS, type Floor } from "./scene";
 
 /**
- * The floor story (preview): one pinned 3D scene driven by scroll.
+ * The floor story: one pinned 3D scene driven by scroll.
  * QR code -> it rises into a mini restaurant -> the camera comes to a table where a menu book
  * opens on a dish with its own QR code -> the real 3D dish appears on the plate (the hook) ->
  * line-drawing chapters on bold page colours (order, kitchen, bill) -> the floor seen from above
  * in the dashboard -> analytics bars grow out of the tables and fly together as bricks into the
- * hourly chart -> the owner dashboard itself, scrolled through. Copy is draft.
+ * hourly chart -> the owner dashboard itself, scrolled through. This is the home page's opening;
+ * its words are in the dictionaries (`floor`).
  */
 
+// When each chapter's words show, and on which side (their text lives in the dictionaries, `floor`)
 type Side = "l" | "r";
-type Chapter = { from: number; to: number; side: Side; eyebrow: string; title: string; text: string; demo?: boolean; legend?: boolean };
-const CHAPTERS: Chapter[] = [
-  { from: 0.085, to: 0.225, side: "l", eyebrow: "01 · The floor", title: "Every square is a table", text: "Your code at the door and on every table. Guests scan it, and the restaurant opens on their phone." },
-  { from: 0.25, to: 0.335, side: "l", eyebrow: "02 · The menu", title: "Keep your menu", text: "Printed or digital, every dish gets its own QR code next to it." },
-  { from: 0.355, to: 0.43, side: "l", eyebrow: "03 · One code per dish", title: "Point the camera", text: "Guests scan the code beside a dish with their phone camera. No app to install." },
-  { from: 0.445, to: 0.555, side: "l", eyebrow: "04 · The dish in 3D", title: "See it on your table", text: "The dish appears right there, life-size and in 3D, before anyone orders it.", demo: true },
-  { from: 0.575, to: 0.63, side: "r", eyebrow: "05 · Order", title: "Order from the table", text: "The order goes straight to the kitchen, with the table number on it." },
-  { from: 0.655, to: 0.705, side: "l", eyebrow: "06 · Kitchen", title: "The kitchen knows", text: "Who ordered what, and how long each table has been waiting." },
-  { from: 0.73, to: 0.785, side: "r", eyebrow: "07 · Bill", title: "The bill, without the wait", text: "Each bill follows its table, so paying takes a minute." },
-  { from: 0.815, to: 0.855, side: "l", eyebrow: "08 · Your floor, live", title: "The whole room on one screen", text: "Which tables are free, eating, waiting or paying, at a glance.", legend: true },
-  { from: 0.862, to: 1.01, side: "l", eyebrow: "09 · Analytics", title: "Know what sells", text: "Every table's orders add up: sales, top dishes, peak hours and 3D views, from the same system." },
+type Cue = { from: number; to: number; side: Side; demo?: boolean; legend?: boolean };
+const CUES: Cue[] = [
+  { from: 0.085, to: 0.225, side: "l" },
+  { from: 0.25, to: 0.335, side: "l" },
+  { from: 0.355, to: 0.43, side: "l" },
+  { from: 0.445, to: 0.555, side: "l", demo: true },
+  { from: 0.575, to: 0.63, side: "r" },
+  { from: 0.655, to: 0.705, side: "l" },
+  { from: 0.73, to: 0.785, side: "r" },
+  { from: 0.815, to: 0.855, side: "l", legend: true },
+  { from: 0.862, to: 1.01, side: "l" },
 ];
 
 // route: the order/bill line, picked to stand out on each page colour
@@ -56,9 +58,15 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 const DEG = Math.PI / 180;
 const FACE = 34; // the azimuth the menu book is read from
 
-type Props = { url: string; lang: Locale; owners: Dictionary["owners"]; menu: Dictionary["menu"] };
+type Props = { url: string; lang: Locale; copy: Dictionary["floor"]; owners: Dictionary["owners"]; menu: Dictionary["menu"] };
 
-export default function FloorStory({ url, lang, owners, menu }: Props) {
+/** Azerbaijani writes numbers like German, and some browsers lack Azerbaijani number data. */
+const numberLocale = (lang: Locale) => (lang === "az" ? "de" : lang);
+
+export default function FloorStory({ url, lang, copy, owners, menu }: Props) {
+  // the same sample figures as the dashboard, written the local way
+  const money = new Intl.NumberFormat(numberLocale(lang), { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const num = new Intl.NumberFormat(numberLocale(lang));
   const root = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
   const target = useRef(0);
@@ -95,7 +103,8 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(24, 1, 0.3, 900);
-      const floor: Floor = buildFloor(THREE, (g) => mergeGeometries(g)!, url, FACE * DEG);
+      const euro = new Intl.NumberFormat(numberLocale(lang), { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+      const floor: Floor = buildFloor(THREE, (g) => mergeGeometries(g)!, url, FACE * DEG, { ...copy.book, price: (n) => euro.format(n) });
       scene.add(floor.root);
       scene.add(new THREE.HemisphereLight(0xffffff, 0xcdc4b6, 1.55));
       const sun = new THREE.DirectionalLight(0xfff3e4, 1.9);
@@ -247,7 +256,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
         let best = 0;
         let bestSide: Side = "l";
         panels.forEach((pe, k) => {
-          const ch = CHAPTERS[k];
+          const ch = CUES[k];
           const o = ramp(q, ch.from, ch.from + 0.014) * (1 - ramp(q, ch.to - 0.014, ch.to));
           show(pe, o, 18);
           if (o > best) {
@@ -413,7 +422,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
       disposed = true;
       cleanup();
     };
-  }, [url]);
+  }, [url, lang, copy.book]);
 
   useGSAP(
     () => {
@@ -432,6 +441,8 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
 
   return (
     <div ref={root} data-floor-story className="relative" style={{ height: "1500svh", background: "var(--c-bg)", color: "var(--c-fg)", ["--c-bg" as string]: PAPER.bg, ["--c-fg" as string]: PAPER.fg, ["--c-muted" as string]: PAPER.muted }}>
+      {/* "For owners" in the menu jumps to the dashboard at the end of the story */}
+      <div id="owners" aria-hidden="true" className="absolute left-0" style={{ top: "calc((100% - 100svh) * 0.975)" }} />
       <div className="sticky top-0 h-svh overflow-hidden">
         <div ref={host} className="absolute inset-0" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[40%] sm:hidden" style={{ background: "linear-gradient(transparent, var(--c-bg) 42%)" }} />
@@ -441,14 +452,14 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
 
         {/* hero */}
         <div data-hero className="pointer-events-none absolute inset-x-5 bottom-10 sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-10 sm:max-w-[min(34rem,40vw)] sm:-translate-y-1/2 lg:left-16">
-          <p className="text-[12.5px] tracking-[0.045em] uppercase" style={{ color: "var(--c-muted)" }}>QR menus for restaurants</p>
-          <h1 className="headline mt-3 text-[clamp(2.6rem,6.2vw,6rem)]">Your restaurant in one QR code</h1>
-          <p className="mt-4 max-w-md text-base sm:text-lg" style={{ color: "var(--c-muted)" }}>From a dish in 3D on your guest&apos;s table to the whole room on your screen.</p>
-          <p className="mt-6 font-mono text-xs tracking-widest uppercase" style={{ color: "var(--c-muted)" }}>Scroll ↓</p>
+          <p className="text-[12.5px] tracking-[0.045em] uppercase" style={{ color: "var(--c-muted)" }}>{copy.hero.eyebrow}</p>
+          <h1 className="headline mt-3 text-[clamp(2.6rem,6.2vw,6rem)]">{copy.hero.title}</h1>
+          <p className="mt-4 max-w-md text-base sm:text-lg" style={{ color: "var(--c-muted)" }}>{copy.hero.text}</p>
+          <p className="mt-6 font-mono text-xs tracking-widest uppercase" style={{ color: "var(--c-muted)" }}>{copy.hero.scroll}</p>
         </div>
 
         {/* chapters: text beside the scene (below it on phones) */}
-        {CHAPTERS.map((ch) => (
+        {copy.chapters.map((words, k) => ({ ...words, ...CUES[k] })).map((ch) => (
           <div
             key={ch.eyebrow}
             data-panel
@@ -459,12 +470,12 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
             <p className="mt-4 max-w-sm text-base sm:text-lg" style={{ color: "var(--c-muted)" }}>{ch.text}</p>
             {ch.demo && (
               <a href={`/${lang}/demo`} className="pill pointer-events-auto mt-6 h-12 px-7 text-[15px]">
-                Try it yourself
+                {copy.tryIt}
               </a>
             )}
             {ch.legend && (
               <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                {["Free", "Eating", "Waiting long", "Paying"].map((s, i) => (
+                {copy.legend.map((s, i) => (
                   <li key={s} className="flex items-center gap-2">
                     <span className="size-3 rounded-[3px]" style={{ background: STATUS[i + 1] }} />
                     {s}
@@ -482,12 +493,12 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
               <span className="flex gap-1.5">
                 {[0, 1, 2].map((i) => <span key={i} className="size-2.5 rounded-full bg-black/10" />)}
               </span>
-              <span className="font-medium text-[#0d0c0b]">{BRAND} · Dashboard</span>
+              <span className="font-medium text-[#0d0c0b]">{BRAND} · {copy.frame.dashboard}</span>
               <span className="ml-auto flex gap-1">
-                {["Floor", "Orders", "Menu", "Analytics"].map((t) => (
+                {copy.frame.tabs.map((t, i) => (
                   <span
                     key={t}
-                    className={`rounded-full px-2.5 py-1 transition-colors max-sm:[&:nth-child(2)]:hidden max-sm:[&:nth-child(3)]:hidden ${t === "Floor" ? "group-data-[tab=floor]:bg-[#0d0c0b] group-data-[tab=floor]:text-white" : t === "Analytics" ? "group-data-[tab=analytics]:bg-[#0d0c0b] group-data-[tab=analytics]:text-white" : ""}`}
+                    className={`rounded-full px-2.5 py-1 transition-colors max-sm:[&:nth-child(2)]:hidden max-sm:[&:nth-child(3)]:hidden ${i === 0 ? "group-data-[tab=floor]:bg-[#0d0c0b] group-data-[tab=floor]:text-white" : i === 3 ? "group-data-[tab=analytics]:bg-[#0d0c0b] group-data-[tab=analytics]:text-white" : ""}`}
                   >
                     {t}
                   </span>
@@ -495,11 +506,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
               </span>
             </div>
             <div className="grid grid-cols-3 gap-px border-b border-black/10 bg-black/10 text-[#0d0c0b]">
-              {[
-                ["Seated", "14 / 22", "Sales today", "€2,846"],
-                ["Waiting > 10 min", "3 tables", "Orders today", "132"],
-                ["Open bills", "6", "Busiest hour", "20:00"],
-              ].map(([a, av, b, bv]) => (
+              {copy.frame.floorKpis.map(([a, av], i) => [a, av, copy.frame.analyticsKpis[i], [money.format(2846), num.format(132), "20:00"][i]]).map(([a, av, b, bv]) => (
                 <div key={a} className="bg-[#fbfaf7] px-4 py-2.5">
                   <p className="text-[11px] text-[#5f5e5c]"><span className="group-data-[tab=analytics]:hidden">{a}</span><span className="hidden group-data-[tab=analytics]:inline">{b}</span></p>
                   <p className="text-sm font-medium sm:text-base"><span className="group-data-[tab=analytics]:hidden">{av}</span><span className="hidden group-data-[tab=analytics]:inline">{bv}</span></p>
@@ -507,7 +514,7 @@ export default function FloorStory({ url, lang, owners, menu }: Props) {
               ))}
             </div>
             <div className="flex-1" />
-            <p className="bg-[#fbfaf7] px-4 py-2 text-[10px] text-[#8a8884]">Sample data · <span className="group-data-[tab=analytics]:hidden">tables by status</span><span className="hidden group-data-[tab=analytics]:inline">orders by table, then by hour</span></p>
+            <p className="bg-[#fbfaf7] px-4 py-2 text-[10px] text-[#8a8884]">{copy.frame.sample} · <span className="group-data-[tab=analytics]:hidden">{copy.frame.byStatus}</span><span className="hidden group-data-[tab=analytics]:inline">{copy.frame.byHour}</span></p>
           </div>
         </div>
 

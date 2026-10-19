@@ -74,7 +74,20 @@ const finderAt = (n: number) => [
 ];
 
 /** `facing`: azimuth (radians, 0 = +z) the menu book is read from, i.e. where the camera looks from. */
-export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.BufferGeometry, url: string, facing: number): Floor {
+/** The words printed in the menu book (from the dictionary), and how prices are written. */
+export type BookText = {
+  menu: string;
+  place: string;
+  scan3d: string;
+  items: string[];
+  pick: string;
+  dish: string;
+  desc: string;
+  scan: string[];
+  price: (n: number) => string;
+};
+
+export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.BufferGeometry, url: string, facing: number, words: BookText): Floor {
   const qr = QRCode.create(url, { errorCorrectionLevel: "L" });
   const n = qr.modules.size;
   const c = (n - 1) / 2;
@@ -558,35 +571,36 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
   const leftPage = page((g) => {
     g.fillStyle = "#0d0c0b";
     g.font = `italic 44px ${serif}`;
-    g.fillText("Menu", 256, 96);
+    g.fillText(words.menu, 256, 96, 440);
     g.fillStyle = "#b83219";
     g.fillRect(226, 120, 60, 3);
-    const items = [["Burrata", "€9"], ["Margherita", "€11"], ["Caesar salad", "€9"], ["Tagliatelle", "€13"], ["Tiramisu", "€6"]];
+    const prices = [9, 11, 9, 13, 6];
+    const items = words.items.map((name, i) => [name, words.price(prices[i] ?? 9)]);
     g.textAlign = "left";
     items.forEach(([name, price], i) => {
       const y = 200 + i * 92;
       g.fillStyle = "#0d0c0b";
       g.font = `30px ${serif}`;
-      g.fillText(name, 60, y);
+      g.fillText(name, 60, y, 300);
       g.textAlign = "right";
       g.font = `30px "Times New Roman", Times, "Liberation Serif", serif`;
       g.fillText(price, 452, y);
       g.textAlign = "left";
       g.fillStyle = "#8a8884";
       g.font = "20px system-ui, sans-serif";
-      g.fillText("scan to see it in 3D", 60, y + 30);
+      g.fillText(words.scan3d, 60, y + 30, 390);
     });
   });
   const rightPage = page((g) => {
     g.fillStyle = "#8a8884";
     g.font = "22px system-ui, sans-serif";
-    g.fillText("Chef's pick", 256, 84);
+    g.fillText(words.pick, 256, 84, 440);
     g.fillStyle = "#0d0c0b";
     g.font = `italic 56px ${serif}`;
-    g.fillText("Cheeseburger", 256, 152);
+    g.fillText(words.dish, 256, 152, 460);
     g.font = "22px system-ui, sans-serif";
     g.fillStyle = "#5f5e5c";
-    g.fillText("Brioche, aged cheddar, pickles · €14", 256, 196);
+    g.fillText(`${words.desc} · ${words.price(14)}`, 256, 196, 460);
     qrAt(g, 136, 236, 240);
     g.fillStyle = "#b83219";
     g.beginPath();
@@ -597,8 +611,8 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     g.fillText("3D", 256, 534);
     g.fillStyle = "#0d0c0b";
     g.font = `26px ${serif}`;
-    g.fillText("Scan it and see the dish", 256, 600);
-    g.fillText("on your table", 256, 636);
+    g.fillText(words.scan[0] ?? "", 256, 600, 460);
+    g.fillText(words.scan[1] ?? "", 256, 636, 460);
   });
   const coverArt = page((g) => {
     g.fillStyle = "#7c2414";
@@ -608,9 +622,9 @@ export function buildFloor(THREE: typeof T, merge: (g: T.BufferGeometry[]) => T.
     g.strokeRect(28, 28, 456, 652);
     g.fillStyle = "#f3e2cc";
     g.font = `italic 64px ${serif}`;
-    g.fillText("Menu", 256, 330);
+    g.fillText(words.menu, 256, 330, 420);
     g.font = "22px system-ui, sans-serif";
-    g.fillText("· Trattoria ·", 256, 390);
+    g.fillText(`· ${words.place} ·`, 256, 390, 420);
   });
   // the cover art sits on the underside of the right half, so it reads upright once flipped closed
   (coverArt.map as T.Texture).center.set(0.5, 0.5);

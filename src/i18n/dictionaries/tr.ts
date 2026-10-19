@@ -223,6 +223,118 @@ const tr: Dictionary = {
     tagline: "3D dijital menüler ve restoran yönetimi.",
     rights: "Tüm hakları saklıdır.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "Restoranlar için QR menüler",
+      "title": "Restoranınız tek bir QR kodda",
+      "text": "Misafirinizin masasındaki 3D yemekten ekranınızdaki tüm salona kadar.",
+      "scroll": "Kaydırın ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · Salon",
+        "title": "Her kare bir masa",
+        "text": "Kodunuz kapıda ve her masada. Misafirler okutur, restoran telefonlarında açılır."
+      },
+      {
+        "eyebrow": "02 · Menü",
+        "title": "Menünüzü koruyun",
+        "text": "Basılı ya da dijital: her yemeğin yanında kendi QR kodu olur."
+      },
+      {
+        "eyebrow": "03 · Her yemeğe bir kod",
+        "title": "Kamerayı doğrultun",
+        "text": "Misafirler yemeğin yanındaki kodu telefon kamerasıyla okutur. Uygulama yüklemeye gerek yok."
+      },
+      {
+        "eyebrow": "04 · 3D yemek",
+        "title": "Masanızda görün",
+        "text": "Yemek tam orada, gerçek boyutta ve 3D olarak belirir, daha kimse sipariş vermeden."
+      },
+      {
+        "eyebrow": "05 · Sipariş",
+        "title": "Masadan sipariş",
+        "text": "Sipariş, masa numarasıyla doğrudan mutfağa gider."
+      },
+      {
+        "eyebrow": "06 · Mutfak",
+        "title": "Mutfak her şeyi bilir",
+        "text": "Kim ne sipariş etti ve her masa ne zamandır bekliyor."
+      },
+      {
+        "eyebrow": "07 · Hesap",
+        "title": "Beklemeden hesap",
+        "text": "Her hesap kendi masasına bağlıdır, böylece ödeme bir dakika sürer."
+      },
+      {
+        "eyebrow": "08 · Salonunuz canlı",
+        "title": "Tüm salon tek ekranda",
+        "text": "Hangi masalar boş, yemek yiyor, bekliyor ya da ödüyor, bir bakışta."
+      },
+      {
+        "eyebrow": "09 · Analizler",
+        "title": "Neyin sattığını bilin",
+        "text": "Her masanın siparişleri toplanır: satışlar, en çok tercih edilen yemekler, yoğun saatler ve 3D görüntülemeler, aynı sistemden."
+      }
+    ],
+    "tryIt": "Kendiniz deneyin",
+    "legend": [
+      "Boş",
+      "Yemek yiyor",
+      "Uzun bekliyor",
+      "Ödüyor"
+    ],
+    "frame": {
+      "dashboard": "Panel",
+      "tabs": [
+        "Salon",
+        "Siparişler",
+        "Menü",
+        "Analizler"
+      ],
+      "floorKpis": [
+        [
+          "Dolu",
+          "14 / 22"
+        ],
+        [
+          "Bekleme > 10 dk",
+          "3 masa"
+        ],
+        [
+          "Açık hesaplar",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Bugünkü satış",
+        "Bugünkü siparişler",
+        "En yoğun saat"
+      ],
+      "sample": "Örnek veriler",
+      "byStatus": "duruma göre masalar",
+      "byHour": "masaya, sonra saate göre siparişler"
+    },
+    "book": {
+      "menu": "Menü",
+      "place": "Trattoria",
+      "scan3d": "3D görmek için okutun",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Sezar salata",
+        "Tagliatelle",
+        "Tiramisu"
+      ],
+      "pick": "Şefin önerisi",
+      "dish": "Cheeseburger",
+      "desc": "Brioş, olgun çedar, turşu",
+      "scan": [
+        "Okutun, yemeği",
+        "masanızda görün"
+      ]
+    }
+  },
 };
 
 export default tr;

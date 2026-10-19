@@ -57,11 +57,15 @@ quality or accessibility).
 - Copy: `src/i18n/dictionaries/{en,de,fr,es,ru,az,tr}.ts`. English defines the shape;
   TypeScript fails the build if another language misses a key.
 - Brand name and contact email: `src/lib/site.ts` (both placeholders).
-- Home page sections: `src/components/home/` ("How it works" figure in `home/how/`). The hero is a pre-rendered
-  burger film scrubbed by scroll (`hero/BurgerStory.tsx`, `hero/FrameScrubber.tsx`,
-  frames in `public/hero/{d,m}/NNN.webp`). "Try it yourself" QR section:
-  `TryIt.tsx`, leading to `/[lang]/demo` (`components/demo/BurgerViewer.tsx`,
-  `<model-viewer>` with `public/models/burger.glb`, self-hosted Draco in `public/draco`).
+- Home page (2026-10-19): the **floor story** (`components/home/floor/`: `FloorStory.tsx` +
+  `scene.ts`, words in the dictionaries under `floor`), then How it works (`home/how/`), Plans, FAQ,
+  Contact (`home/Sections.tsx`). "For owners" jumps to `#owners`, a marker near the story's end
+  (the dashboard). `/[lang]/lab/floor` redirects home. The story's "Try it yourself" leads to
+  `/[lang]/demo` (`components/demo/BurgerViewer.tsx`, `<model-viewer>` with `public/models/burger.glb`,
+  self-hosted Draco in `public/draco`).
+- No longer on the home page (kept for now, ask before deleting): the burger film hero
+  (`home/hero/`, frames in `public/hero/`), `TryIt.tsx`, the `Owners` section; their dictionary keys
+  (`hero`, `story`, `journey`) are unused.
 - The burger itself: `blender/burger.py` (Blender as a Python module; geometry,
   numpy textures, lights and animation all in code) and `blender/pack.py`
   (renders -> web frames). See "Re-rendering the burger" below.
@@ -165,7 +169,11 @@ coffee machine, bartender), till (card terminal, receipt printer, bill tray wher
 tip jar, cake display, bench, cashier, a guest paying). Smoothness: shadows redrawn only when the room
 changes (`shadowMap.autoUpdate = false`), shaders/textures compiled up front (`compileAsync`),
 adaptive pixel ratio, style writes only on change, no backdrop blur or multiply grain over the canvas.
-Draft copy, sample data: confirm the dashboard features before any of it goes on the homepage.
+It became the home page on 2026-10-19 (the user: "this will be our main website"), in all seven
+languages. Sample data; the dashboard features (orders, kitchen, bills, table status, analytics) are
+described in the existing site copy too, but confirm with the user before launch.
+Headlines: `.headline` line-height is 0.94 for English, 1.12 for az/tr and 1.02 for de/fr/es
+(marks on capitals collided).
 
 3D QR (`components/qr3d/QrScene.tsx`, lab page `/[lang]/lab/qr`): rebuilt (2026-10-18) from
 the user's louisraille.fr reel frames: a tall tree whose leaves are square plates stacked only

@@ -223,6 +223,118 @@ const az: Dictionary = {
     tagline: "3D rəqəmsal menyular və restoran idarəetməsi.",
     rights: "Bütün hüquqlar qorunur.",
   },
+  floor: {
+    "hero": {
+      "eyebrow": "Restoranlar üçün QR menyular",
+      "title": "Restoranınız bir QR kodda",
+      "text": "Qonağın masasındakı 3D yeməkdən ekranınızdakı bütün zala qədər.",
+      "scroll": "Sürüşdürün ↓"
+    },
+    "chapters": [
+      {
+        "eyebrow": "01 · Zal",
+        "title": "Hər xana bir masadır",
+        "text": "Kodunuz girişdə və hər masada. Qonaqlar onu skan edir və restoran telefonlarında açılır."
+      },
+      {
+        "eyebrow": "02 · Menyu",
+        "title": "Menyunuzu saxlayın",
+        "text": "Çap olunmuş və ya rəqəmsal: hər yeməyin yanında öz QR kodu olur."
+      },
+      {
+        "eyebrow": "03 · Hər yeməyə bir kod",
+        "title": "Kameranı tutun",
+        "text": "Qonaqlar yeməyin yanındakı kodu telefon kamerası ilə skan edir. Tətbiq quraşdırmaq lazım deyil."
+      },
+      {
+        "eyebrow": "04 · Yemək 3D-də",
+        "title": "Masanızda görün",
+        "text": "Yemək elə oradaca, real ölçüdə və 3D görünür, hələ heç kim sifariş etmədən."
+      },
+      {
+        "eyebrow": "05 · Sifariş",
+        "title": "Masadan sifariş",
+        "text": "Sifariş masa nömrəsi ilə birbaşa mətbəxə gedir."
+      },
+      {
+        "eyebrow": "06 · Mətbəx",
+        "title": "Mətbəx hər şeyi bilir",
+        "text": "Kim nə sifariş edib və hər masa nə qədərdir gözləyir."
+      },
+      {
+        "eyebrow": "07 · Hesab",
+        "title": "Gözləmədən hesab",
+        "text": "Hər hesab öz masasına bağlıdır, ona görə ödəniş bir dəqiqə çəkir."
+      },
+      {
+        "eyebrow": "08 · Zalınız canlı",
+        "title": "Bütün zal bir ekranda",
+        "text": "Hansı masalar boşdur, yemək yeyir, gözləyir və ya ödəyir, bir baxışda."
+      },
+      {
+        "eyebrow": "09 · Analitika",
+        "title": "Nəyin satıldığını bilin",
+        "text": "Hər masanın sifarişləri toplanır: satışlar, ən populyar yeməklər, sıx saatlar və 3D baxışlar, eyni sistemdən."
+      }
+    ],
+    "tryIt": "Özünüz yoxlayın",
+    "legend": [
+      "Boş",
+      "Yemək yeyir",
+      "Çox gözləyir",
+      "Ödəyir"
+    ],
+    "frame": {
+      "dashboard": "İdarə paneli",
+      "tabs": [
+        "Zal",
+        "Sifarişlər",
+        "Menyu",
+        "Analitika"
+      ],
+      "floorKpis": [
+        [
+          "Dolu",
+          "14 / 22"
+        ],
+        [
+          "Gözləmə > 10 dəq",
+          "3 masa"
+        ],
+        [
+          "Açıq hesablar",
+          "6"
+        ]
+      ],
+      "analyticsKpis": [
+        "Bugünkü satış",
+        "Bugünkü sifarişlər",
+        "Ən sıx saat"
+      ],
+      "sample": "Nümunə məlumat",
+      "byStatus": "statusa görə masalar",
+      "byHour": "masalar, sonra saatlar üzrə sifarişlər"
+    },
+    "book": {
+      "menu": "Menyu",
+      "place": "Trattoria",
+      "scan3d": "3D görmək üçün skan edin",
+      "items": [
+        "Burrata",
+        "Margherita",
+        "Sezar salatı",
+        "Talyatelle",
+        "Tiramisu"
+      ],
+      "pick": "Aşpazın seçimi",
+      "dish": "Çizburger",
+      "desc": "Brioş, yetişmiş çedder, turşu",
+      "scan": [
+        "Skan edin və yeməyi",
+        "masanızda görün"
+      ]
+    }
+  },
 };
 
 export default az;
