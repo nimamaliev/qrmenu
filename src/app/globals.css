@@ -214,3 +214,29 @@ body:has([data-floor-story])::after {
   mix-blend-mode: normal;
   opacity: 0.05;
 }
+
+/* The language list opens right under its button. Popovers live in the top layer, so it is
+   anchored to the button where CSS anchor positioning exists; elsewhere it lines up with the
+   header's right edge (max-w-7xl container), next to the "Book a demo" button. */
+.lang-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  top: 4.25rem;
+  right: max(1rem, calc((100vw - 80rem) / 2 + 10rem));
+}
+@media (max-width: 639px) {
+  .lang-menu {
+    right: 4rem;
+  }
+}
+@supports (anchor-name: --a) {
+  .lang-trigger {
+    anchor-name: --lang-menu;
+  }
+  .lang-menu {
+    position-anchor: --lang-menu;
+    top: calc(anchor(bottom) + 0.5rem);
+    right: anchor(right);
+  }
+}

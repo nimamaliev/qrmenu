@@ -80,9 +80,12 @@ export default function OwnerDashboard({ lang, owners, menu }: { lang: Locale; o
   const [hoverHour, setHoverHour] = useState<number | null>(null);
 
   const fmt = useMemo(() => {
-    const money = new Intl.NumberFormat(lang, { style: "currency", currency: "EUR" });
-    const moneyRound = new Intl.NumberFormat(lang, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
-    const num = new Intl.NumberFormat(lang, { maximumFractionDigits: 0 });
+    // Some browsers ship without Azerbaijani number data (and then disagree with the server);
+    // Azerbaijani writes numbers exactly like German (2.846,50 €), which every browser has.
+    const nf = lang === "az" ? "de" : lang;
+    const money = new Intl.NumberFormat(nf, { style: "currency", currency: "EUR" });
+    const moneyRound = new Intl.NumberFormat(nf, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+    const num = new Intl.NumberFormat(nf, { maximumFractionDigits: 0 });
     return { money: (n: number) => money.format(n), moneyRound: (n: number) => moneyRound.format(n), num: (n: number) => num.format(n) };
   }, [lang]);
 

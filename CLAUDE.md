@@ -54,7 +54,7 @@ quality or accessibility).
 
 ## Where things live
 
-- Copy: `src/i18n/dictionaries/{en,de,fr,es,ru}.ts`. English defines the shape;
+- Copy: `src/i18n/dictionaries/{en,de,fr,es,ru,az,tr}.ts`. English defines the shape;
   TypeScript fails the build if another language misses a key.
 - Brand name and contact email: `src/lib/site.ts` (both placeholders).
 - Home page sections: `src/components/home/` ("How it works" figure in `home/how/`). The hero is a pre-rendered
@@ -109,7 +109,9 @@ Decided / waiting on the user:
   scan (or the team's own filmed build) would beat it. Don't use the reference
   YouTube clip itself on the site (not ours).
 - **Contact email** stays a placeholder until the user provides one.
-- **Translations**: the user is reviewing de/fr/es/ru.
+- **Translations**: the user is reviewing de/fr/es/ru. Azerbaijani and Turkish added 2026-10-19
+  (machine-quality first drafts by Claude: get a native speaker to read them before launch). Azerbaijani
+  numbers are formatted with the German rules (identical, and every browser has them).
 - **Mobile polish is deferred** until the design settles; don't spend time on it.
 - Claims to confirm before launch: which phones support the AR view; that
   restaurants can edit dishes and prices themselves.
