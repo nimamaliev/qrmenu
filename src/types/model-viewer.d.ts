@@ -6,6 +6,7 @@ declare module "react" {
     interface IntrinsicElements {
       "model-viewer": DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
         src?: string;
+        "ios-src"?: string;
         poster?: string;
         alt?: string;
         ar?: boolean;

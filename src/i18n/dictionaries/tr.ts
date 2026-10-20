@@ -77,10 +77,15 @@ const tr: Dictionary = {
     metaTitle: "3D demo",
     eyebrow: "Canlı demo",
     title: "Misafirleriniz bunu görür",
-    text: "Burgeri çevirmek için sürükleyin, yakınlaştırmak için iki parmağınızla sıkıştırın. Destekleyen telefonlarda masanıza gerçek boyutunda koyun.",
+    text: "Yemeği çevirmek için sürükleyin, yakınlaştırmak için iki parmağınızla sıkıştırın. Destekleyen telefonlarda masanıza gerçek boyutunda koyun.",
+    hint: "Telefonda: telefonu iyi ışıkta bir masaya doğrultun ve yemek görünene kadar yavaşça hareket ettirin.",
     ar: "Masanızda görün",
     note: "Örnek yemek. Sizin yemekleriniz kendi fotoğraflarınızdan modellenir.",
     back: "Web sitesine dön",
+    dishes: {
+      burger: "Çizburger, Ø 11 cm",
+      pizza: "Tabakta kıymalı acı pizza, Ø 26 cm",
+    },
   },
   owners: {
     eyebrow: "Restoran sahipleri için",

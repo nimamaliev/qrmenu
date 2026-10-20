@@ -61,8 +61,18 @@ quality or accessibility).
   `scene.ts`, words in the dictionaries under `floor`), then How it works (`home/how/`), Plans, FAQ,
   Contact (`home/Sections.tsx`). "For owners" jumps to `#owners`, a marker near the story's end
   (the dashboard). `/[lang]/lab/floor` redirects home. The story's "Try it yourself" leads to
-  `/[lang]/demo` (`components/demo/BurgerViewer.tsx`, `<model-viewer>` with `public/models/burger.glb`,
-  self-hosted Draco in `public/draco`).
+  `/[lang]/demo` (`components/demo/DishViewer.tsx`, `<model-viewer>`; the dish comes from `lib/dishes.ts`,
+  switched with `DEMO_DISH`; alt names in the dictionaries under `demo.dishes`). Since 2026-10-20 the demo
+  dish is the **pizza**: a real phone scan (Polycam) of the user's pizza on a modelled 26 cm plate,
+  `public/models/pizza.glb` (no extensions, 2048 px texture, ~96k triangles: inside Scene Viewer's
+  limits), `pizza.usdz` (iOS Quick Look, passes Apple's ARKit compliance checks) and `pizza-poster.webp`.
+  `next.config.ts` serves .usdz as `model/vnd.usdz+zip` (Safari needs it) and .glb as `model/gltf-binary`.
+  Opened from outside the site (the QR code) on a phone, the demo tries to go straight into AR once per tab
+  (`autoAR`; Scene Viewer first because WebXR always needs a tap; iOS Quick Look needs a tap), with the
+  "View on your table" button as the way in otherwise, and a "point it at a table in good light" hint.
+  The burger (`burger.glb`, self-hosted Draco in `public/draco`) is kept: set `DEMO_DISH = "burger"` to
+  bring it back. The floor story still shows the burger on its table and "Cheeseburger" in the menu book
+  (ask the user whether to switch those to the pizza too).
 - No longer on the home page (kept for now, ask before deleting): the burger film hero
   (`home/hero/`, frames in `public/hero/`), `TryIt.tsx`, the `Owners` section; their dictionary keys
   (`hero`, `story`, `journey`) are unused.
@@ -105,8 +115,8 @@ user found the pizza too basic and the phone too close to armenu.co.uk).
   right; below lg: copy on top, burger under it.
 - Guest section: "Try it yourself" with a real QR code to `/[lang]/demo` (live 3D
   burger, AR button on supporting phones) plus the five numbered steps.
-- Unverified: AR on real phones (model-viewer: Scene Viewer on Android, a USDZ it
-  generates itself for iOS Quick Look). Ask the user to test on their phones.
+- Unverified: AR on real phones (Scene Viewer on Android, Quick Look with `pizza.usdz` on iOS), and
+  whether phones allow the automatic jump into AR from the QR code. Ask the user to test on their phones.
 
 Decided / waiting on the user:
 - **Realism**: the procedural burger is the current best; a real photogrammetry

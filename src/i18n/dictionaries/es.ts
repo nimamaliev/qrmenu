@@ -78,10 +78,15 @@ const es: Dictionary = {
     metaTitle: "Demo 3D",
     eyebrow: "Demo en vivo",
     title: "Esto es lo que ven tus clientes",
-    text: "Arrastra para girar la hamburguesa y pellizca para hacer zoom. En los móviles compatibles, colócala en tu mesa a tamaño real.",
+    text: "Arrastra para girar el plato y pellizca para hacer zoom. En los móviles compatibles, colócalo en tu mesa a tamaño real.",
+    hint: "En el móvil: apunta a una mesa con buena luz y muévelo despacio hasta que aparezca el plato.",
     ar: "Ver en mi mesa",
     note: "Plato de ejemplo. Tus platos se modelan a partir de tus propias fotos.",
     back: "Volver a la web",
+    dishes: {
+      burger: "Hamburguesa con queso, Ø 11 cm",
+      pizza: "Pizza picante de carne picada en un plato, Ø 26 cm",
+    },
   },
   owners: {
     eyebrow: "Para dueños de restaurantes",
