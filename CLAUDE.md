@@ -204,9 +204,9 @@ blocked from cloud sessions; ask for its GitHub repo or screenshots.
 
 Live preview: https://qrmenu-preview.onrender.com (Render free web service
 `qrmenu-preview`, id `srv-db2bvgrtqb8s73cs6gqg`, branch `claude/nice-ramanujan-rqzau5`;
-sleeps when idle, so the first visit takes up to a minute). Pushes do NOT deploy
-on their own (no GitHub webhook): after pushing, trigger a deploy with the Render
-tools and check it reaches "live". `NEXT_PUBLIC_SITE_URL` is set there for the QR code. The Vercel connector can't
+sleeps when idle, so the first visit takes up to a minute). Render reports auto-deploy
+on commit (2026-10-24); after pushing, check with the Render tools that a deploy started
+and reaches "live", and trigger one if none did. `NEXT_PUBLIC_SITE_URL` is set there for the QR code. The Vercel connector can't
 create projects in the user's team (403 on scope), hence Render. Cloud sessions
 can't open onrender.com; check deploys with the Render tools instead.
 
@@ -223,6 +223,11 @@ Checking visuals: run `npm run dev`, then use Playwright with
 `--use-gl=angle --use-angle=swiftshader` so WebGL renders. Scroll with
 `behavior: "instant"`, because the site uses smooth scrolling. Most outside
 websites are blocked by the cloud network policy.
+
+Security (2026-10-24): Next.js 16.4.3 (16.3.8 had a critical advisory, GHSA-2464-fhr4-w9xw);
+security headers incl. a strict CSP live in `next.config.ts`. Everything is self-hosted, so the CSP
+allows only our origin: anything new from another domain (fonts, analytics, video) must be added
+there or it will be blocked. Run `npm audit` before launch-type changes.
 
 ## Commands
 
