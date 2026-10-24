@@ -76,15 +76,10 @@ const en = {
     metaTitle: "3D demo",
     eyebrow: "Live demo",
     title: "This is what your guests see",
-    text: "Drag to turn the dish and pinch to zoom. On phones that support it, place it on your table at real size.",
-    hint: "On your phone: point it at a table in good light and move it slowly until the dish appears.",
+    text: "Drag to turn the burger and pinch to zoom. On phones that support it, place it on your table at real size.",
     ar: "View on your table",
     note: "Sample dish. Your dishes are modelled from your own photos.",
     back: "Back to the website",
-    dishes: {
-      burger: "Cheeseburger, Ø 11 cm",
-      pizza: "Spicy beef pizza on a plate, Ø 26 cm",
-    },
   },
   owners: {
     eyebrow: "For restaurant owners",

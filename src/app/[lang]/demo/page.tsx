@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import DishViewer from "@/components/demo/DishViewer";
-import { DEMO_DISH, DISHES } from "@/lib/dishes";
+import BurgerViewer from "@/components/demo/BurgerViewer";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/demo">): Promise<Metadata> {
   const { lang } = await params;
@@ -19,11 +18,11 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/demo">): P
   };
 }
 
-/** Where the QR code on the home page leads: the demo dish (DEMO_DISH) as a real-time 3D model with AR. */
+/** Where the QR code on the home page leads: the hero burger as a real-time 3D model with AR. */
 export default async function Demo({ params }: PageProps<"/[lang]/demo">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const { demo } = await getDictionary(lang);
+  const { demo, story } = await getDictionary(lang);
 
   return (
     <section className="mx-auto flex min-h-svh max-w-6xl flex-col px-4 pt-24 pb-10 sm:px-6 lg:flex-row lg:items-center lg:gap-12 lg:pt-16">
@@ -40,10 +39,9 @@ export default async function Demo({ params }: PageProps<"/[lang]/demo">) {
         </a>
       </div>
       <div className="relative mt-6 h-[min(58svh,30rem)] lg:mt-0 lg:h-[min(44rem,80svh)] lg:flex-1">
-        <DishViewer dish={DISHES[DEMO_DISH]} alt={demo.dishes[DEMO_DISH]} arLabel={demo.ar} autoAR />
+        <BurgerViewer alt={`${story.arDish}, ${story.arSize}`} arLabel={demo.ar} />
       </div>
-      <p className="mt-4 text-center text-sm text-pretty lg:hidden">{demo.hint}</p>
-      <p className="mt-2 text-center text-sm text-muted lg:hidden">{demo.note}</p>
+      <p className="mt-4 text-center text-sm text-muted lg:hidden">{demo.note}</p>
       <a href={`/${lang}`} className="pill-ghost mx-auto mt-4 h-11 px-5 text-sm lg:hidden">
         ← {demo.back}
       </a>

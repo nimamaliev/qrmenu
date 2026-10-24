@@ -78,15 +78,10 @@ const de: Dictionary = {
     metaTitle: "3D-Demo",
     eyebrow: "Live-Demo",
     title: "So sehen es Ihre Gäste",
-    text: "Ziehen, um das Gericht zu drehen, mit zwei Fingern zoomen. Auf Handys, die es unterstützen, stellen Sie es in Originalgröße auf Ihren Tisch.",
-    hint: "Am Handy: Richten Sie es bei gutem Licht auf einen Tisch und bewegen Sie es langsam, bis das Gericht erscheint.",
+    text: "Ziehen, um den Burger zu drehen, mit zwei Fingern zoomen. Auf Handys, die es unterstützen, stellen Sie ihn in Originalgröße auf Ihren Tisch.",
     ar: "Auf dem Tisch ansehen",
     note: "Beispielgericht. Ihre Gerichte entstehen aus Ihren eigenen Fotos.",
     back: "Zurück zur Website",
-    dishes: {
-      burger: "Cheeseburger, Ø 11 cm",
-      pizza: "Scharfe Pizza mit Hackfleisch auf einem Teller, Ø 26 cm",
-    },
   },
   owners: {
     eyebrow: "Für Gastronomen",

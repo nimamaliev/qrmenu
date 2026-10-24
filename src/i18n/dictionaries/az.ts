@@ -77,15 +77,10 @@ const az: Dictionary = {
     metaTitle: "3D demo",
     eyebrow: "Canlı demo",
     title: "Qonaqlarınız bunu görür",
-    text: "Yeməyi çevirmək üçün sürüşdürün, yaxınlaşdırmaq üçün iki barmaqla sıxın. Dəstəkləyən telefonlarda onu masanıza real ölçüdə qoyun.",
-    hint: "Telefonda: onu yaxşı işıqda masaya tutun və yemək görünənə qədər yavaş-yavaş hərəkət etdirin.",
+    text: "Burgeri fırlatmaq üçün sürüşdürün, yaxınlaşdırmaq üçün iki barmaqla sıxın. Dəstəkləyən telefonlarda onu masanıza real ölçüdə qoyun.",
     ar: "Masanızda baxın",
     note: "Nümunə yemək. Sizin yeməkləriniz öz fotolarınızdan modelləşdirilir.",
     back: "Sayta qayıt",
-    dishes: {
-      burger: "Çizburger, Ø 11 sm",
-      pizza: "Mal əti qiyməli acılı pizza boşqabda, Ø 26 sm",
-    },
   },
   owners: {
     eyebrow: "Restoran sahibləri üçün",
