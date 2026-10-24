@@ -194,7 +194,9 @@ Not on the homepage yet.
 Research: how the Awwwards-winning igloo.inc is built, and what fits QRMenu,
 is in `docs/research/igloo-inc.md`; Ciao Energy and FIX Chocolatier in
 `docs/research/ciao-energy-fix-chocolatier.md`. awwwards.com resets connections from cloud
-sessions (even with domain access).
+sessions (even with domain access). How to capture real dishes cheaply (iPhone + Windows laptop,
+free tools; mesh for AR on every phone, Gaussian splat for the web view; iPhone web AR can't show
+splats) is in `docs/research/3d-food-capture-pipeline.md`.
 
 Next up: the user's feedback on the burger film and the QR demo (and AR tests
 on their phones); possibly a separate Pricing page. Before opening another MotionSites prompt, show the user a
